@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Le Guide Parisien | Your Modern Guide to Paris</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        /* --- Global Styles & Variables --- */
+        :root {
+            --primary-color: #1a1a1a; /* Dark Charcoal */
+            --secondary-color: #bfa888; /* Soft Gold */
+            --background-color: #fdfcf9; /* Off-white */
+            --card-background: #ffffff;
+            --text-color: #333333;
+            --subtle-text: #777777;
+            --border-color: #eaeaea;
+            --shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+            --font-heading: 'Playfair Display', serif;
+            --font-body: 'Poppins', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.7;
+        }
+
+        /* --- Typography --- */
+        h1, h2, h3 {
+            font-family: var(--font-heading);
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+
+        h1 {
+            font-size: 4rem;
+            color: white;
+            text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        h2 {
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--secondary-color);
+            display: inline-block;
+        }
+
+        h3 {
+            font-size: 1.4rem;
+            margin-bottom: 0.5rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+        }
+
+        a {
+            color: var(--secondary-color);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        a:hover {
+            color: var(--primary-color);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+        }
+
+        /* --- Header & Navigation --- */
+        .hero {
+            height: 70vh;
+            background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('https://images.unsplash.com/photo-1502602898657-3e91760c0341?auto=format&fit=crop&w=1600&q=80');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .hero p {
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 300;
+        }
+        
+        nav {
+            background-color: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            width: 100%;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+        }
+
+        nav a {
+            font-weight: 400;
+            color: var(--text-color);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            padding-bottom: 5px;
+        }
+        
+        nav a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--secondary-color);
+            transition: width 0.3s ease;
+        }
+
+        nav a:hover::after {
+            width: 100%;
+        }
+
+        /* --- Card Layout --- */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 2rem;
+        }
+
+        .card {
+            background-color: var(--card-background);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+        }
+
+        .card-image {
+            height: 200px;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .card-content {
+            padding: 1.5rem;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-description {
+            font-size: 0.95rem;
+            color: var(--subtle-text);
+            flex-grow: 1;
+        }
+
+        .card-details {
+            font-size: 0.85rem;
+            color: var(--subtle-text);
+            margin-top: 1rem;
+        }
+        
+        .card-details strong {
+            color: var(--text-color);
+        }
+
+        .card-footer {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .tags span {
+            display: inline-block;
+            background-color: #f0f0f0;
+            color: var(--subtle-text);
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            margin-right: 0.5rem;
+            font-weight: 600;
+        }
+
+        /* --- Footer --- */
+        footer {
+            text-align: center;
+            padding: 2rem;
+            background-color: var(--primary-color);
+            color: #f0f0f0;
+            font-size: 0.9rem;
+        }
+
+        /* --- Responsive Design --- */
+        @media (max-width: 768px) {
+            h1 { font-size: 3rem; }
+            h2 { font-size: 2rem; }
+            .container { padding: 3rem 1rem; }
+            nav ul { gap: 1rem; }
+            nav a { font-size: 0.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="hero">
+        <h1>Le Guide Parisien</h1>
+        <p>Discover the heart of Paris, curated for you.</p>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="#kids">For Kids</a></li>
+            <li><a href="#adults">For Adults</a></li>
+            <li><a href="#theatre">Theatre</a></li>
+            <li><a href="#museums">Museums</a></li>
+            <li><a href="#parks">Parks</a></li>
+            <li><a href="#shopping">Shopping</a></li>
+            <li><a href="#restaurants">Restaurants</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <section id="kids" class="container">
+            <h2>For Kids</h2>
+            <div class="grid">
+                <article class="card">
+                    <div class="card-image" style="background-image: url('https://images.unsplash.com/photo-1599949987158-183d88b49e03?auto=format&fit=crop&w=400&q=80')"></div>
+                    <div class="card-content">
+                        <h3>Jardin d’Acclimatation</h3>
+                        <p class="card-description">Classic amusement park with rides, farm animals, puppet shows, and workshops. Great for a fun family day.</p>
+                        <p class="card-details"><strong>Address:</strong> Bois de Boulogne, 75116 Paris</p>
+                        <div class="card-footer">
+                            <div class="tags">
+                                <span>Affordable</span>
+                                <span>English-friendly</span>
+                            </div>
+                            <a href="https://www.jardindacclimatation.fr" target="_blank">Visit Website &rarr;</a>
+                        </div>
+                    </div>
+                </article>
+                <article class="card">
+                    <div class="card-image" style="background-image: url('https://images.unsplash.com/photo-1616422285329-433b8a356342?auto=format&fit=crop&w=400&q=80')"></div>
+                    <div class="card-content">
+                        <h3>Cité des Enfants</h3>
+                        <p class="card-description">Hands-on science museum for kids, with interactive exhibits for ages 2–12.</p>
+                        <p class="card-details"><strong>Address:</strong> 30 Avenue Corentin Cariou, 75019 Paris</p>
+                        <div class="card-footer">
+                            <div class="tags">
+                                <span>Affordable</span>
+                                <span>English-friendly</span>
+                            </div>
+                            <a href="https://www.cite-sciences.fr/en/home" target="_blank">Visit Website &rarr;</a>
+                        </div>
+                    </div>
+                </article>
+                <article class="card">
+                    <div class="card-image" style="background-image: url('https://images.unsplash.com/photo-1591823730384-38c4c3746a6f?auto=format&fit=crop&w=400&q=80')"></div>
+                    <div class="card-content">
+                        <h3>Parc Zoologique de Paris</h3>
+                        <p class="card-description">Large zoo with diverse animal species and educational shows; perfect for animal-loving kids.</p>
+                        <p class="card-details"><strong>Address:</strong> 5 Avenue Daumesnil, 75012 Paris</p>
+                        <div class="card-footer">
+                            <div class="tags">
+                                <span>Affordable</span>
+                                <span>English-friendly</span>
+                            </div>
+                            <a href="https://www.parczoologiquedeparis.fr" target="_blank">Visit Website &rarr;</a>
+                        </div>
+                    </div>
+                </article>
+                 <article class="card">
+                    <div class="card-image" style="background-image: url('https://images.unsplash.com/photo-1573354474931-331a9ba349e5?auto=format&fit=crop&w=400&q=80')"></div>
+                    <div class="card-content">
+                        <h3>Aquaboulevard</h3>
+                        <p class="card-description">Huge indoor water park with slides, wave pool, and toddler areas; good for rainy days.</p>
+                        <p class="card-details"><strong>Address:</strong> 4 Rue Louis Armand, 75015 Paris</p>
+                        <div class="card-footer">
+                            <div class="tags">
+                                <span>Affordable</span>
+                                <span>English-friendly</span>
+                            </div>
+                            <a href="https://www.aquaboulevard.fr" target="_blank">Visit Website &rarr;</a>
+                        </div>
+                    </div>
+                </article>
+                <article class="card">
+                    <div class="card-image" style="background-image: url('https://images.unsplash.com/photo-1574515665338-31b036283134?auto=format&fit=crop&w=400&q=80')"></div>
+                    <div class="card-content">
+                        <h3>Le Manoir de Paris</h3>
+                        <p class="card-description">Interactive haunted house with actors; fun for older kids and teens who like a thrill.</p>
+                        <p class="card-details"><strong>Address:</strong> 18 Rue de Paradis, 75010 Paris</p>
+                        <div class="card-footer">
+                            <div class="tags">
+                                <span>Mix</span>
+                                <span>English-friendly</span>
+                            </div>
+                            <a href="https://www.lemanoirdeparis.com" target="_blank">Visit Website &rarr;</a>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <section id="adults" class="container">
+            <h2>For Adults</h2>
+            <div class="grid">
+                <article class="card">
+                    <div class="card-image" style="background-image: url('https://images.unsplash.com/photo-1552533633-967923c8e5e6?auto=format&fit=crop&w=400&q=80')"></div>
+                    <div class="card-content">
+                        <h3>Le Marais Walking Tour</h3>
+                        <p class="card-description">Explore the historic Marais district with boutique shops, cafés, and galleries; perfect for cultural discovery.</p>
+                        <p class="card-details"><strong>Address:</strong> Starts at Place des Vosges, 75004 Paris</p>
+                        <div class="card-footer">
+                            <div class="tags">
+                                <span>Affordable</span>
+                                <span>English-friendly</span>
+                            </div>
+                            <a href="https://www.paris-walking-tours.com" target="_blank">Visit Website &rarr;</a>
+                        </div>
+                    </div>
+                </article>
+                <article class="card">
+                    <div class="card-image" style="background-image: url('https://images.unsplash.com/photo-1543349689-9b4d4262e84b?auto=format&fit=crop&w=400&q=80')"></div>
+                    <div class="card-content">
+                        <h3>Seine River Dinner Cruise</h3>
+                        <p class="card-description">Romantic evening cruise with dinner and views of Paris landmarks like the Eiffel Tower.</p>
+                        <p class="card-details"><strong>Address:</strong> Port de la Bourdonnais, 75007 Paris</p>
+                        <div class="card-footer">
+                            <div class="tags">
+                                <span>Luxury</span>
+                                <span>English-friendly</span>
+                            </div>
+                            <a href="https://www.bateauxparisiens.com" target="_blank">Visit Website &rarr;</a>
+                        </div>
+                    </div>
+                </article>
+                <article class="card">
+                    <div class="card-image" style="background-image: url('https://images.unsplash.com/photo-1509912759883-2f78b1d41818?auto=format&fit=crop&w=400&q=80')"></div>
+                    <div class="card-content">
+                        <h3>Montmartre Wine & Food Tour</h3>
+                        <p class="card-description">Guided tasting of French wines, cheeses, and pastries in the bohemian Montmartre district.</p>
+                        <p class="card-details"><strong>Address:</strong> Starts at Abbesses Metro, 75018 Paris</p>
+                        <div class="card-footer">
+                            <div class="tags">
+                                <span>Mix</span>
+                                <span>English-friendly</span>
+                            </div>
+                            <a href="https://www.parisbyfood.com" target="_blank">Visit Website &rarr;</a>
+                        </div>
+                    </div>
+                </article>
+                <article class="card">
+                    <div class="card-image" style="background-image: url('https://images.unsplash.com/photo-1594950549428-c5798725888a?auto=format&fit=crop&w=400&q=80')"></div>
+                    <div class="card-content">
+                        <h3>Rooftop Bar: Le Perchoir</h3>
+                        <p class="card-description">Trendy rooftop bar with cocktails and panoramic city views; ideal for evening drinks.</p>
+                        <p class="card-details"><strong>Address:</strong> 14 Rue Crespin du Gast, 75011 Paris</p>
+                        <div class="card-footer">
+                            <div class="tags">
+                                <span>Mix</span>
+                                <span>English-friendly</span>
+                            </div>
+                            <a href="https://www.leperchoir.fr" target="_blank">Visit Website &rarr;</a>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <section id="theatre" class="container">
+            <h2>Theatre</h2>
+            <div class="grid">
+                <article class="card">
+                    <div class="card-image" style="background-image: url('https://images.unsplash.com/photo-1605333140413-a496b83f5108?auto=format&fit=crop&w=400&q=80')"></div>
+                    <div class="card-content">
+                        <h3>Comédie-Française</h3>
+                        <p class="card-description">France’s national theatre with classical French plays; iconic and historical venue.</p>
+                        <p class="card-details"><strong>Address:</strong> 2 Rue de Richelieu, 75001 Paris</p>
+                        <div class="card-footer">
+                            <div class="tags">
+                                <span>Luxury</span>
+                                <span>Mostly French</span>
+                            </div>
+                            <a href="https://www.comedie-francaise.fr" target="_blank">Visit Website &rarr;</a>
+                        </div>
+                    </div>
+                </article>
+                <article class="card">
+                    <div class="card-image" style="background-image: url('https://images.unsplash.com/photo-1596956473123-64903332a685?auto=format&fit=crop&w=400&q=80')"></div>
+                    <div class="card-content">
+                        <h3>Théâtre Mogador</h3>
+                        <p class="card-description">Large theatre hosting musicals and popular English-language shows like The Lion King.</p>
+                        <p class="card-details"><strong>Address:</strong> 25 Rue de Mogador, 75009 Paris</p>
+                        <div class="card-footer">
+                            <div class="tags">
+                                <span>Luxury</span>
+                                <span>English-friendly</span>
+                            </div>
+                            <a href="https://www.theatremogador.com" target="_blank">Visit Website &rarr;</a>
+                        </div>
+                    </div>
+                </article>
+                 <article class="card">
+                    <div class="card-image" style="background-image: url('https://images.unsplash.com/photo-1504913258525-f71120a16c34?auto=format&fit=crop&w=400&q=80')"></div>
+                    <div class="card-content">
+                        <h3>Le Lido de Paris</h3>
+                        <p class="card-description">Legendary cabaret show with dance, music, and extravagant costumes; evening-only entertainment.</p>
+                        <p class="card-details"><strong>Address:</strong> 116 Avenue des Champs-Élysées, 75008 Paris</p>
+                        <div class="card-footer">
+                            <div class="tags">
+                                <span>Luxury</span>
+                                <span>English-friendly</span>
+                            </div>
+                            <a href="https://www.lido.fr" target="_blank">Visit Website &rarr;</a>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <section id="museums" class="container">
+            <h2>Museums</h2>
+            <div class="grid">
+                <article class="card">
+                    <div class="card-image" style="background-image: url('https://images.unsplash.com/photo-1581327128913-583b43825701?auto=format&fit=crop&w=400&q=80')"></div>
+                    <div class="card-content">
+                        <h3>Louvre Museum</h3>
+                        <p class="card-description">World-famous art museum featuring the Mona Lisa, Venus de Milo, and thousands of other masterpieces.</p>
+                        <p class="card-details"><strong>Address:</strong> Rue de Rivoli, 75001 Paris</p>
+                        <div class="card-footer">
+                            <div class="tags">
+                                <span>Mix</span>
+                                <span>English-friendly</span>
+                            </div>
+                            <a href="https://www.louvre.fr" target="_blank">Visit Website &rarr;</a>
+                        </div>
+                    </div>
+                </article>
+                <article class="card">
+                    <div class="card-image" style="background-image: url('https://images.unsplash.com/photo-1593593979726-318e4a827a48?auto=format&fit=crop&w=400&q=80')"></div>
+                    <div class="card-content">
+                        <h3>Musée d’Orsay</h3>
+                        <p class="card-description">Impressionist art in a stunning former railway station; Monet, Van Gogh, Renoir collections.</p>
+                        <p class="card-details"><strong>Address:</strong> 1 Rue de la Légion d’Honneur, 75007 Paris</p>
+                        <div class="card-footer">
+                            <div class="tags">
+                                <span>Mix</span>
+                                <span>English-friendly</span>
+                            </div>
+                            <a href="https://www.musee-orsay.fr" target="_blank">Visit Website &rarr;</a>
+                        </div>
+                    </div>
+                </article>
+                <article class="card">
+                    <div class="card-image" style="background-image: url('https://images.unsplash.com/photo-1560013912-2c638205f993?auto=format&fit=crop&w=400&q=80')"></div>
+                    <div class="card-content">
+                        <h3>Centre Pompidou</h3>
+                        <p class="card-description">Modern art museum with vibrant exhibitions and a colorful architectural design; also offers rooftop views.</p>
+                        <p class="card-details"><strong>Address:</strong> Place Georges-Pompidou, 75004 Paris</p>
+                        <div class="card-footer">
+                            <div class="tags">
+                                <span>Affordable</span>
+                                <span>English-friendly</span>
+                            </div>
+                            <a href="https://www.centrepompidou.fr" target="_blank">Visit Website &rarr;</a>
+                        </div>
+                    </div>
+                </article>
+                <article class="card">
+                    <div class="card-image" style="background-image: url('https://images.unsplash.com/photo-1621640578828-5d2f80f1e06d?auto=format&fit=crop&w=400&q=80')"></div>
+                    <div class="card-content">
+                        <h3>Musée Rodin</h3>
+                        <p class="card-description">Sculptures by Auguste Rodin, set in beautiful gardens; perfect for a peaceful afternoon.</p>
+                        <p class="card-details"><strong>Address:</strong> 79 Rue de Varenne, 75007 Paris</p>
+                        <div class="card-footer">
+                            <div class="tags">
+                                <span>Affordable</span>
+                                <span>English-friendly</span>
+                            </div>
+                            <a href="https://www.musee-rodin.fr" target="_blank">Visit Website &rarr;</a>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <section id="parks" class="container">
+            <h2>Parks & Gardens</h2>
+            <div class="grid">
+                 <article class="card">
+                    <div class="card-image" style="background-image: url('https://images.unsplash.com/photo-1558914436-0780a4593855?auto=format&fit=crop&w=400&q=80')"></div>
+                    <div class="card-content">
+                        <h3>Jardin des Tuileries</h3>
+                        <p class="card-description">Historic formal gardens between the Louvre and Place de la Concorde; perfect for walking and picnics.</p>
+                        <p class="card-details"><strong>Address:</strong> Place de la Concorde, 75001 Paris</p>
+                        <div class="card-footer">
+                            <div class="tags">
+                                <span>Free</span>
+                            </div>
+                            <a href="https://www.louvre.fr/en/jardin-des-tuileries" target="_blank">Learn More &rarr;</a>
+                        </div>
+                    </div>
+                </article>
+                <article class="card">
+                    <div class="card-image" style="background-image: url('https://images.unsplash.com/photo-1599834571742-e66d4a5b3a3c?auto=format&fit=crop&w=400&q=80')"></div>
+                    <div class="card-content">
+                        <h3>Luxembourg Gardens</h3>
+                        <p class="card-description">Beautifully landscaped park with fountains, statues, playgrounds, and great ambience; popular with locals.</p>
+                        <p class="card-details"><strong>Address:</strong> 75006 Paris</p>
+                        <div class="card-footer">
+                            <div class="tags">
+                                <span>Free</span>
+                            </div>
+                            <a href="https://www.senat.fr/visite/jardin/index.html" target="_blank">Learn More &rarr;</a>
+                        </div>
+                    </div>
+                </article>
+                <article class="card">
+                    <div class="card-image" style="background-image: url('https://images.unsplash.com/photo-1623995322998-e7c65b1d5e32?auto=format&fit=crop&w=400&q=80')"></div>
+                    <div class="card-content">
+                        <h3>Parc des Buttes-Chaumont</h3>
+                        <p class="card-description">Hilly park with waterfalls, cliffs, and bridges; great for both day picnics and sunset walks.</p>
+                        <p class="card-details"><strong>Address:</strong> 1 Rue Botzaris, 75019 Paris</p>
+                        <div class="card-footer">
+                            <div class="tags">
+                                <span>Free</span>
+                            </div>
+                            <a href="https://www.paris.fr/parcdesbutteschaumont" target="_blank">Learn More &rarr;</a>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <section id="shopping" class="container">
+            <h2>Shopping</h2>
+            <div class="grid">
+                <article class="card">
+                    <div class="card-image" style="background-image: url('https://images.unsplash.com/photo-1595333219326-b333907a3c31?auto=format&fit=crop&w=400&q=80')"></div>
+                    <div class="card-content">
+                        <h3>Galeries Lafayette</h3>
+                        <p class="card-description">Iconic department store with luxury brands, fashion, and a rooftop terrace offering city views.</p>
+                        <p class="card-details"><strong>Address:</strong> 40 Boulevard Haussmann, 75009 Paris</p>
+                        <div class="card-footer">
+                            <div class="tags">
+                                <span>Luxury</span>
+                                <span>English-friendly</span>
+                            </div>
+                            <a href="https://www.galerieslafayette.com" target="_blank">Visit Website &rarr;</a>
+                        </div>
+                    </div>
+                </article>
+                <article class="card">
+                    <div class="card-image" style="background-image: url('https://images.unsplash.com/photo-1610938883995-305f8892f3e4?auto=format&fit=crop&w=400&q=80')"></div>
+                    <div class="card-content">
+                        <h3>Merci Concept Store</h3>
+                        <p class="card-description">Trendy boutique offering clothing, home décor, and unique gifts; famous for its charity-driven concept.</p>
+                        <p class="card-details"><strong>Address:</strong> 111 Boulevard Beaumarchais, 75003 Paris</p>
+                        <div class="card-footer">
+                            <div class="tags">
+                                <span>Mix</span>
+                                <span>English-friendly</span>
+                            </div>
+                            <a href="https://www.merci-merci.com" target="_blank">Visit Website &rarr;</a>
+                        </div>
+                    </div>
+                </article>
+                <article class="card">
+                    <div class="card-image" style="background-image: url('https://images.unsplash.com/photo-1574581568224-345384a75e88?auto=format&fit=crop&w=400&q=80')"></div>
+                    <div class="card-content">
+                        <h3>Marché aux Puces de Saint-Ouen</h3>
+                        <p class="card-description">Famous flea market with vintage fashion, antiques, and collectibles; lively daytime shopping experience.</p>
+                        <p class="card-details"><strong>Address:</strong> 140 Rue des Rosiers, 93400 Saint-Ouen</p>
+                        <div class="card-footer">
+                            <div class="tags">
+                                <span>Mix</span>
+                                <span>English-friendly</span>
+                            </div>
+                            <a href="https://www.marcheauxpuces-saintouen.com" target="_blank">Visit Website &rarr;</a>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <section id="restaurants" class="container">
+            <h2>Restaurants</h2>
+            <div class="grid">
+                <article class="card">
+                    <div class="card-image" style="background-image: url('https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=400&q=80')"></div>
+                    <div class="card-content">
+                        <h3>Le Meurice Alain Ducasse</h3>
+                        <p class="card-description">Michelin-starred fine dining in a luxurious palace setting; French haute cuisine at its best.</p>
+                        <p class="card-details"><strong>Address:</strong> 228 Rue de Rivoli, 75001 Paris</p>
+                        <div class="card-footer">
+                            <div class="tags">
+                                <span>Luxury</span>
+                            </div>
+                            <a href="https://www.alain-ducasse.com" target="_blank">Visit Website &rarr;</a>
+                        </div>
+                    </div>
+                </article>
+                <article class="card">
+                    <div class="card-image" style="background-image: url('https://images.unsplash.com/photo-1504754524776-8f4f37790774?auto=format&fit=crop&w=400&q=80')"></div>
+                    <div class="card-content">
+                        <h3>Chez Janou</h3>
+                        <p class="card-description">Cozy bistro in Le Marais offering classic Provençal dishes; casual and lively atmosphere.</p>
+                        <p class="card-details"><strong>Address:</strong> 2 Rue Roger Verlomme, 75003 Paris</p>
+                        <div class="card-footer">
+                            <div class="tags">
+                                <span>Affordable</span>
+                            </div>
+                            <a href="https://www.chezjanou.com" target="_blank">Visit Website &rarr;</a>
+                        </div>
+                    </div>
+                </article>
+                <article class="card">
+                    <div class="card-image" style="background-image: url('https://images.unsplash.com/photo-1565299543923-37dd37887442?auto=format&fit=crop&w=400&q=80')"></div>
+                    <div class="card-content">
+                        <h3>L’As du Fallafel</h3>
+                        <p class="card-description">Famous for its falafel sandwiches; quick, affordable, and popular with locals and tourists alike.</p>
+                        <p class="card-details"><strong>Address:</strong> 34 Rue des Rosiers, 75004 Paris</p>
+                        <div class="card-footer">
+                            <div class="tags">
+                                <span>Affordable</span>
+                            </div>
+                            <a href="https://www.lasdufallafel.com" target="_blank">Visit Website &rarr;</a>
+                        </div>
+                    </div>
+                </article>
+                <article class="card">
+                    <div class="card-image" style="background-image: url('https://images.unsplash.com/photo-1547573854-74d2a71d0826?auto=format&fit=crop&w=400&q=80')"></div>
+                    <div class="card-content">
+                        <h3>Le Relais de l’Entrecôte</h3>
+                        <p class="card-description">Classic French steak-frites restaurant; known for its signature sauce and simple, iconic menu.</p>
+                        <p class="card-details"><strong>Address:</strong> 20 Rue Saint-Benoît, 75006 Paris</p>
+                        <div class="card-footer">
+                            <div class="tags">
+                                <span>Mix</span>
+                            </div>
+                            <a href="https://www.relaisentrecote.fr" target="_blank">Visit Website &rarr;</a>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Le Guide Parisien. Curated with &hearts; in Paris.</p>
+    </footer>
+
+</body>
+</html>

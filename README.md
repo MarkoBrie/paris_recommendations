@@ -1,1 +1,3 @@
-# paris_recommendations
+# Paris Guide
+
+This HTML file is a curated guide to Paris, organized into sections for different interests: Kids, Adults, Theatre, Museums, Parks, Shopping, and Restaurants. Each section features several recommendations, each shown as a card with an image, a short description, the address, and a link to the official website. The page starts with a large header and navigation menu, and ends with a simple footer. The content is visually organized and easy to browse, helping users quickly find places and activities in Paris.
