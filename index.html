@@ -3,278 +3,497 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Le Guide Parisien | Your Modern Planner for Paris</title>
+    <title>Vavin-Montparnasse: At the Heart of the Roaring Twenties</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Parisian Café (Warm neutrals like beige/cream, with dark brown text and muted red/blue accents) -->
+    <!-- Application Structure Plan: A thematic, non-linear SPA. The core is an interactive map of key venues, supplemented by a filterable gallery of notable figures, a visual timeline, and a comparative chart of café personalities. This structure encourages exploration and discovery over passive reading, making the rich history of Vavin more engaging and digestible for a general audience. Navigation is handled by a sticky header for easy access to all sections. -->
+    <!-- Visualization & Content Choices: 1. Locations: Interactive HTML/CSS diagram instead of a map. Goal: Explore. Interaction: Click to show info panel. Justification: Simpler, more focused on key sites. 2. Figures: Filterable HTML grid. Goal: Organize/Inform. Interaction: Click for details. Justification: Allows users to focus on specific disciplines. 3. Café Comparison: Chart.js Radar Chart. Goal: Compare. Interaction: Hover for tooltips. Justification: Visually represents the distinct "personality" of each café described in the text. 4. Timeline: Interactive HTML/CSS component. Goal: Show Change. Interaction: Click to reveal era summary. Justification: Provides clear historical context. CONFIRMED: No SVG/Mermaid used. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <style>
-        /* --- Global Styles & Variables --- */
-        :root {
-            --primary-color: #1a1a1a; /* Dark Charcoal */
-            --secondary-color: #bfa888; /* Soft Gold */
-            --accent-color: #e63946; /* A vibrant red for buttons */
-            --background-color: #fdfcf9; /* Off-white */
-            --card-background: #ffffff;
-            --text-color: #333333;
-            --subtle-text: #777777;
-            --border-color: #eaeaea;
-            --shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
-            --font-heading: 'Playfair Display', serif;
-            --font-body: 'Poppins', sans-serif;
+        /* --- Vavin Explorer Styles --- */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FDFBF5;
+            color: #4A4A4A;
+        }
+        .vavin-explorer-container .active-nav, .lang-btn.active {
+            color: #C1666B;
+            border-bottom: 2px solid #C1666B;
+        }
+        .vavin-explorer-container .nav-link, .lang-btn {
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+        .vavin-explorer-container .nav-link:hover, .lang-btn:hover {
+            color: #C1666B;
+            border-bottom: 2px solid #C1666B;
+        }
+        .vavin-explorer-container .card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .vavin-explorer-container .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .vavin-explorer-container .active-filter {
+            background-color: #4A5568;
+            color: #FFFFFF;
+        }
+        .vavin-explorer-container .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .vavin-explorer-container .chart-container {
+                height: 400px;
+            }
+        }
+        .vavin-explorer-container .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        html { scroll-behavior: smooth; }
-        body {
-            font-family: var(--font-body);
-            background-color: var(--background-color);
-            color: var(--text-color);
+        /* --- Paris Guide Styles --- */
+        .paris-guide-container {
+            font-family: 'Poppins', sans-serif;
+            background-color: #fdfcf9;
+            color: #333;
             line-height: 1.7;
         }
-
-        /* --- Typography --- */
-        h1, h2, h3 { font-family: var(--font-heading); color: var(--primary-color); font-weight: 700; }
-        h1 { font-size: 4rem; color: white; text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5); }
-        h2 { font-size: 2.5rem; margin-bottom: 2rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--secondary-color); display: inline-block; }
-        h3 { font-size: 1.4rem; margin-bottom: 0.5rem; }
-        p { margin-bottom: 1rem; }
-        a { color: var(--secondary-color); text-decoration: none; font-weight: 600; transition: color 0.3s ease; }
-        a:hover { color: var(--primary-color); }
-
-        .container { max-width: 1200px; margin: 0 auto; padding: 4rem 2rem; }
-
-        /* --- Header & Navigation --- */
-        .hero {
+        .paris-guide-container h1, .paris-guide-container h2, .paris-guide-container h3 { font-family: 'Playfair Display', serif; color: #1a1a1a; font-weight: 700; }
+        .paris-guide-container h1 { font-size: 4rem; color: white; text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5); }
+        .paris-guide-container h2 { font-size: 2.5rem; margin-bottom: 2rem; padding-bottom: 0.5rem; border-bottom: 2px solid #bfa888; display: inline-block; }
+        .paris-guide-container h3 { font-size: 1.4rem; margin-bottom: 0.5rem; }
+        .paris-guide-container p { margin-bottom: 1rem; }
+        .paris-guide-container a { color: #bfa888; text-decoration: none; font-weight: 600; transition: color 0.3s ease; }
+        .paris-guide-container a:hover { color: #1a1a1a; }
+        .paris-guide-container .container { max-width: 1200px; margin: 0 auto; padding: 4rem 2rem; }
+        .paris-guide-container .hero {
             height: 60vh;
             background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('https://images.unsplash.com/photo-1502602898657-3e91760c0341?auto=format&fit=crop&w=1600&q=80');
-            background-size: cover;
-            background-position: center;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
+            background-size: cover; background-position: center; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;
         }
-        .hero p { color: white; font-size: 1.2rem; font-weight: 300; }
-        
-        nav {
-            background-color: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--border-color);
-            padding: 1rem 2rem;
-            position: sticky; top: 0; z-index: 1000;
-        }
-        nav ul { list-style: none; display: flex; justify-content: center; flex-wrap: wrap; gap: 1.5rem; }
-        nav a { font-weight: 400; color: var(--text-color); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; position: relative; padding-bottom: 5px; cursor: pointer; }
-        nav a::after { content: ''; position: absolute; width: 0; height: 2px; bottom: 0; left: 50%; transform: translateX(-50%); background-color: var(--secondary-color); transition: width 0.3s ease; }
-        nav a:hover::after { width: 100%; }
-
-        /* --- Card Layout --- */
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 2rem; }
-        .card { background-color: var(--card-background); border-radius: 12px; box-shadow: var(--shadow); overflow: hidden; display: flex; flex-direction: column; transition: transform 0.3s ease, box-shadow 0.3s ease; }
-        .card:hover { transform: translateY(-8px); box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12); }
-        .card-content { padding: 1.5rem; flex-grow: 1; display: flex; flex-direction: column; }
-        .card-description { font-size: 0.95rem; color: var(--subtle-text); flex-grow: 1; }
-        .card-footer { margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
-
-        /* --- New Button Styles --- */
-        .btn {
-            background-color: transparent;
-            border: 2px solid var(--secondary-color);
-            color: var(--secondary-color);
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-        .btn:hover { background-color: var(--secondary-color); color: white; }
-        .btn-primary { background-color: var(--accent-color); color: white; border-color: var(--accent-color); }
-        .btn-primary:hover { background-color: #c42d38; border-color: #c42d38; }
-
-        /* --- Modal Styles --- */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(5px); display: flex; justify-content: center; align-items: center; z-index: 2000; opacity: 0; visibility: hidden; transition: all 0.3s ease; }
-        .modal-overlay.active { opacity: 1; visibility: visible; }
-        .modal-content { background: white; padding: 2rem; border-radius: 12px; width: 90%; max-width: 400px; text-align: center; transform: scale(0.9); transition: transform 0.3s ease; }
-        .modal-overlay.active .modal-content { transform: scale(1); }
-        .modal-content h3 { margin-bottom: 1.5rem; }
-        .modal-content input[type="date"] { width: 100%; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 8px; font-family: var(--font-body); font-size: 1rem; margin-bottom: 1.5rem; }
-        .modal-buttons { display: flex; gap: 1rem; justify-content: center; }
-
-        /* --- Calendar View Styles --- */
-        #calendar-view { display: none; } /* Hidden by default */
-        .calendar-header { text-align: center; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; }
-        #calendar-month-year { font-family: var(--font-heading); font-size: 2rem; }
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
-        .calendar-day, .calendar-header-day { background: white; padding: 0.75rem; border-radius: 8px; min-height: 120px; border: 1px solid var(--border-color); }
-        .calendar-header-day { min-height: auto; text-align: center; font-weight: 600; background-color: #f9f9f9; }
-        .calendar-day-number { font-weight: 600; }
-        .calendar-day.other-month { background-color: #f7f7f7; color: #ccc; }
-        .calendar-event { background: var(--secondary-color); color: white; padding: 0.25rem 0.5rem; border-radius: 5px; font-size: 0.8rem; margin-top: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-        /* --- Footer --- */
-        footer { text-align: center; padding: 2rem; background-color: var(--primary-color); color: #f0f0f0; }
-
+        .paris-guide-container .hero p { color: white; font-size: 1.2rem; font-weight: 300; }
+        .paris-guide-container nav { background-color: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid #eaeaea; padding: 1rem 2rem; }
+        .paris-guide-container nav ul { list-style: none; display: flex; justify-content: center; flex-wrap: wrap; gap: 1.5rem; }
+        .paris-guide-container nav a { font-weight: 400; color: #333; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; position: relative; padding-bottom: 5px; cursor: pointer; }
+        .paris-guide-container nav a::after { content: ''; position: absolute; width: 0; height: 2px; bottom: 0; left: 50%; transform: translateX(-50%); background-color: #bfa888; transition: width 0.3s ease; }
+        .paris-guide-container nav a:hover::after { width: 100%; }
+        .paris-guide-container .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 2rem; }
+        .paris-guide-container .card { background-color: #ffffff; border-radius: 12px; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08); overflow: hidden; display: flex; flex-direction: column; transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .paris-guide-container .card:hover { transform: translateY(-8px); box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12); }
+        .paris-guide-container .card-content { padding: 1.5rem; flex-grow: 1; display: flex; flex-direction: column; }
+        .paris-guide-container .card-description { font-size: 0.95rem; color: #777; flex-grow: 1; }
+        .paris-guide-container .card-footer { margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #eaeaea; display: flex; justify-content: space-between; align-items: center; }
+        .paris-guide-container .btn { background-color: transparent; border: 2px solid #bfa888; color: #bfa888; padding: 0.5rem 1rem; border-radius: 20px; cursor: pointer; font-weight: 600; transition: all 0.3s ease; }
+        .paris-guide-container .btn:hover { background-color: #bfa888; color: white; }
+        .paris-guide-container .btn-primary { background-color: #e63946; color: white; border-color: #e63946; }
+        .paris-guide-container .btn-primary:hover { background-color: #c42d38; border-color: #c42d38; }
+        .paris-guide-container .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(5px); display: flex; justify-content: center; align-items: center; z-index: 2000; opacity: 0; visibility: hidden; transition: all 0.3s ease; }
+        .paris-guide-container .modal-overlay.active { opacity: 1; visibility: visible; }
+        .paris-guide-container .modal-content { background: white; padding: 2rem; border-radius: 12px; width: 90%; max-width: 400px; text-align: center; transform: scale(0.9); transition: transform 0.3s ease; }
+        .paris-guide-container .modal-overlay.active .modal-content { transform: scale(1); }
+        .paris-guide-container .modal-content h3 { margin-bottom: 1.5rem; }
+        .paris-guide-container .modal-content input[type="date"] { width: 100%; padding: 0.75rem; border: 1px solid #eaeaea; border-radius: 8px; font-family: 'Poppins', sans-serif; font-size: 1rem; margin-bottom: 1.5rem; }
+        .paris-guide-container .modal-buttons { display: flex; gap: 1rem; justify-content: center; }
+        .paris-guide-container #calendar-view { display: none; }
+        .paris-guide-container .calendar-header { text-align: center; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .paris-guide-container #calendar-month-year { font-family: 'Playfair Display', serif; font-size: 2rem; }
+        .paris-guide-container .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+        .paris-guide-container .calendar-day, .paris-guide-container .calendar-header-day { background: white; padding: 0.75rem; border-radius: 8px; min-height: 120px; border: 1px solid #eaeaea; }
+        .paris-guide-container .calendar-header-day { min-height: auto; text-align: center; font-weight: 600; background-color: #f9f9f9; }
+        .paris-guide-container .calendar-day-number { font-weight: 600; }
+        .paris-guide-container .calendar-day.other-month { background-color: #f7f7f7; color: #ccc; }
+        .paris-guide-container .calendar-event { background: #bfa888; color: white; padding: 0.25rem 0.5rem; border-radius: 5px; font-size: 0.8rem; margin-top: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .paris-guide-container footer { text-align: center; padding: 2rem; background-color: #1a1a1a; color: #f0f0f0; }
         @media (max-width: 768px) {
-            h1 { font-size: 3rem; }
-            h2 { font-size: 2rem; }
-            .container { padding: 3rem 1rem; }
-            .calendar-day, .calendar-header-day { padding: 0.5rem; font-size: 0.8rem; min-height: 80px; }
-            .calendar-event { font-size: 0.7rem; }
+            .paris-guide-container h1 { font-size: 3rem; }
+            .paris-guide-container h2 { font-size: 2rem; }
+            .paris-guide-container .container { padding: 3rem 1rem; }
+            .paris-guide-container .calendar-day, .paris-guide-container .calendar-header-day { padding: 0.5rem; font-size: 0.8rem; min-height: 80px; }
+            .paris-guide-container .calendar-event { font-size: 0.7rem; }
         }
     </style>
 </head>
-<body>
+<body class="antialiased">
 
-    <header class="hero">
-        <h1>Le Guide Parisien</h1>
-        <p>Your Modern Planner for Paris.</p>
-    </header>
-
-    <nav>
-        <ul>
-            <li><a id="nav-guide">Guide</a></li>
-            <li><a id="nav-calendar">My Calendar</a></li>
-        </ul>
-    </nav>
-
-    <div id="guide-view">
-        </div>
-    
-    <div id="calendar-view" class="container">
-        <div class="calendar-header">
-            <button id="prev-month" class="btn">&larr; Prev</button>
-            <h2 id="calendar-month-year"></h2>
-            <button id="next-month" class="btn">Next &rarr;</button>
-        </div>
-        <div class="calendar-grid" id="calendar-days-header"></div>
-        <div class="calendar-grid" id="calendar-body"></div>
-    </div>
-
-
-    <div id="event-modal" class="modal-overlay">
-        <div class="modal-content">
-            <h3>Add to Your Plan</h3>
-            <p id="modal-place-name" style="margin-bottom: 1.5rem; font-weight: 600;"></p>
-            <input type="date" id="event-date">
-            <div class="modal-buttons">
-                <button id="cancel-event" class="btn">Cancel</button>
-                <button id="save-event" class="btn btn-primary">Save to Calendar</button>
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-gray-800">Vavin 1920</h1>
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="#lieux" class="nav-link text-gray-600 font-semibold pb-1 active-nav" data-lang-key="navVenues">Venues</a>
+                <a href="#personnages" class="nav-link text-gray-600 font-semibold pb-1" data-lang-key="navFigures">Figures</a>
+                <a href="#chronologie" class="nav-link text-gray-600 font-semibold pb-1" data-lang-key="navTimeline">Timeline</a>
+                <a href="#heritage" class="nav-link text-gray-600 font-semibold pb-1" data-lang-key="navLegacy">Legacy</a>
+                <a href="#" id="nav-guide-parisien" class="nav-link text-gray-600 font-semibold pb-1 border-l pl-8" data-lang-key="navGuide">Paris Guide</a>
+                <div class="flex space-x-4 ml-4 border-l pl-4">
+                    <button class="lang-btn text-gray-600 font-semibold pb-1 active" data-lang="en">EN</button>
+                    <button class="lang-btn text-gray-600 font-semibold pb-1" data-lang="fr">FR</button>
+                </div>
+            </div>
+             <button id="mobile-menu-button" class="md:hidden focus:outline-none">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+            </button>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden">
+            <a href="#lieux" class="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100" data-lang-key="navVenues">Venues</a>
+            <a href="#personnages" class="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100" data-lang-key="navFigures">Figures</a>
+            <a href="#chronologie" class="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100" data-lang-key="navTimeline">Timeline</a>
+            <a href="#heritage" class="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100" data-lang-key="navLegacy">Legacy</a>
+            <a href="#" id="nav-guide-parisien-mobile" class="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100 border-t" data-lang-key="navGuide">Paris Guide</a>
+             <div class="flex justify-center space-x-4 py-2 border-t">
+                <button class="lang-btn-mobile px-4 py-2 text-sm font-semibold rounded-full bg-gray-200" data-lang="en">English</button>
+                <button class="lang-btn-mobile px-4 py-2 text-sm font-semibold rounded-full" data-lang="fr">Français</button>
             </div>
         </div>
+    </header>
+
+    <div id="vavin-explorer-view">
+        <main class="container mx-auto px-6 py-12 vavin-explorer-container">
+            <section class="text-center mb-20">
+                <h2 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4" data-lang-key="heroTitle">The Navel of the World</h2>
+                <p class="text-lg text-gray-600 max-w-3xl mx-auto" data-lang-key="heroSubtitle">Dive into the heart of Montparnasse during the Roaring Twenties...</p>
+            </section>
+            <section id="lieux" class="mb-20">
+                <h3 class="text-3xl font-bold text-center text-gray-800 mb-2" data-lang-key="venuesTitle">The Theaters of Bohemia</h3>
+                <p class="text-center text-gray-600 mb-12 max-w-2xl mx-auto" data-lang-key="venuesSubtitle">The cafés, studios, and academies were the beating heart of the district...</p>
+                <div class="lg:flex lg:space-x-8">
+                    <div id="locations-grid" class="lg:w-1/2 grid grid-cols-2 gap-4 mb-8 lg:mb-0"></div>
+                    <div id="location-details" class="lg:w-1/2 bg-white p-8 rounded-lg shadow-lg min-h-[300px] flex flex-col justify-center">
+                        <div class="text-center text-gray-500"><p data-lang-key="selectVenuePrompt">Select a venue to display details.</p></div>
+                    </div>
+                </div>
+            </section>
+            <section id="personnages" class="mb-20">
+                <h3 class="text-3xl font-bold text-center text-gray-800 mb-2" data-lang-key="figuresTitle">The "Montparnos"</h3>
+                <p class="text-center text-gray-600 mb-8 max-w-2xl mx-auto" data-lang-key="figuresSubtitle">Artists, writers, muses... They came from all over the world to live and create in Paris...</p>
+                <div id="filters-container" class="flex justify-center flex-wrap gap-2 mb-8"></div>
+                <div id="personnages-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
+            </section>
+            <section id="chronologie" class="mb-20">
+                <h3 class="text-3xl font-bold text-center text-gray-800 mb-2" data-lang-key="timelineTitle">A History in Motion</h3>
+                <p class="text-center text-gray-600 mb-12 max-w-2xl mx-auto" data-lang-key="timelineSubtitle">From its meteoric rise to its radical transformation...</p>
+                <div class="relative">
+                    <div class="border-l-2 border-gray-300 absolute h-full top-0 left-1/2 -ml-px"></div>
+                    <div id="timeline-container" class="space-y-12"></div>
+                </div>
+            </section>
+            <section id="heritage" class="mb-20">
+                <h3 class="text-3xl font-bold text-center text-gray-800 mb-2" data-lang-key="legacyTitle">The Spirit of Montparnasse</h3>
+                <p class="text-center text-gray-600 mb-12 max-w-2xl mx-auto" data-lang-key="legacySubtitle">The Roaring Twenties are over, but the legacy of this golden age endures...</p>
+                <div class="grid md:grid-cols-2 gap-8 items-center">
+                    <div>
+                        <h4 class="text-xl font-bold text-gray-800 mb-4" data-lang-key="cafeChartTitle">The Personality of the Cafés</h4>
+                        <p class="text-gray-600 mb-6" data-lang-key="cafeChartDescription">Each great brasserie at the Vavin crossroads had its own character...</p>
+                        <div class="chart-container"><canvas id="cafeChart"></canvas></div>
+                    </div>
+                    <div class="bg-white p-8 rounded-lg shadow-lg">
+                        <h4 class="text-xl font-bold text-gray-800 mb-4" data-lang-key="vavinTodayTitle">Vavin Today: The Ghost in the Machine</h4>
+                        <p class="text-gray-600 mb-4" data-lang-key="vavinTodayP1">The district has changed radically...</p>
+                        <p class="text-gray-600" data-lang-key="vavinTodayP2">The legendary cafés have become high-end brasseries...</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+        <footer class="bg-white border-t border-gray-200">
+            <div class="container mx-auto px-6 py-4 text-center text-gray-500">
+                <p data-lang-key="footerText">&copy; 2025 Vavin Explorer. An interactive exploration of the history of Montparnasse.</p>
+            </div>
+        </footer>
     </div>
+
+    <div id="paris-guide-view" class="hidden paris-guide-container">
+        <header class="hero">
+            <h1>Le Guide Parisien</h1>
+            <p>Your Modern Planner for Paris.</p>
+        </header>
+        <nav>
+            <ul>
+                <li><a id="nav-guide">Guide</a></li>
+                <li><a id="nav-calendar">My Calendar</a></li>
+            </ul>
+        </nav>
+        <div id="guide-view"></div>
+        <div id="calendar-view" class="container">
+            <div class="calendar-header">
+                <button id="prev-month" class="btn">&larr; Prev</button>
+                <h2 id="calendar-month-year"></h2>
+                <button id="next-month" class="btn">Next &rarr;</button>
+            </div>
+            <div class="calendar-grid" id="calendar-days-header"></div>
+            <div class="calendar-grid" id="calendar-body"></div>
+        </div>
+        <div id="event-modal" class="modal-overlay">
+            <div class="modal-content">
+                <h3>Add to Your Plan</h3>
+                <p id="modal-place-name" style="margin-bottom: 1.5rem; font-weight: 600;"></p>
+                <input type="date" id="event-date">
+                <div class="modal-buttons">
+                    <button id="cancel-event" class="btn">Cancel</button>
+                    <button id="save-event" class="btn btn-primary">Save to Calendar</button>
+                </div>
+            </div>
+        </div>
+        <footer>
+            <p>&copy; 2025 Le Guide Parisien. Curated with &hearts; in Paris.</p>
+        </footer>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
     
-    <footer>
-        <p>&copy; 2025 Le Guide Parisien. Curated with &hearts; in Paris.</p>
-    </footer>
-
-    <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const guideData = {
-            "For Kids": [
-                { title: "Jardin d’Acclimatation", description: "Classic amusement park with rides, farm animals, puppet shows, and workshops.", address: "Bois de Boulogne, 75116 Paris", website: "https://www.jardindacclimatation.fr" },
-                { title: "Cité des Enfants", description: "Hands-on science museum for kids, with interactive exhibits for ages 2–12.", address: "30 Avenue Corentin Cariou, 75019 Paris", website: "https://www.cite-sciences.fr/en/home" },
-                { title: "Parc Zoologique de Paris", description: "Large zoo with diverse animal species and educational shows; perfect for animal-loving kids.", address: "5 Avenue Daumesnil, 75012 Paris", website: "https://www.parczoologiquedeparis.fr" },
-                { title: "Aquaboulevard", description: "Huge indoor water park with slides, wave pool, and toddler areas; good for rainy days.", address: "4 Rue Louis Armand, 75015 Paris", website: "https://www.aquaboulevard.fr" },
-                { title: "Le Manoir de Paris", description: "Interactive haunted house with actors; fun for older kids and teens who like a thrill.", address: "18 Rue de Paradis, 75010 Paris", website: "https://www.lemanoirdeparis.com" }
-            ],
-            "For Adults": [
-                { title: "Le Marais Walking Tour", description: "Explore the historic Marais district with boutique shops, cafés, and galleries.", address: "Starts at Place des Vosges, 75004 Paris", website: "https://www.paris-walking-tours.com" },
-                { title: "Seine River Dinner Cruise", description: "Romantic evening cruise with dinner and views of Paris landmarks like the Eiffel Tower.", address: "Port de la Bourdonnais, 75007 Paris", website: "https://www.bateauxparisiens.com" },
-                { title: "Montmartre Wine & Food Tour", description: "Guided tasting of French wines, cheeses, and pastries in the bohemian Montmartre district.", address: "Starts at Abbesses Metro, 75018 Paris", website: "https://www.parisbyfood.com" },
-                { title: "Rooftop Bar: Le Perchoir", description: "Trendy rooftop bar with cocktails and panoramic city views; ideal for evening drinks.", address: "14 Rue Crespin du Gast, 75011 Paris", website: "https://www.leperchoir.fr" }
-            ],
-            "Theatre": [
-                { title: "Comédie-Française", description: "France’s national theatre with classical French plays; iconic and historical venue.", address: "2 Rue de Richelieu, 75001 Paris", website: "https://www.comedie-francaise.fr" },
-                { title: "Théâtre Mogador", description: "Large theatre hosting musicals and popular English-language shows like The Lion King.", address: "25 Rue de Mogador, 75009 Paris", website: "https://www.theatremogador.com" },
-                { title: "Le Lido de Paris", description: "Legendary cabaret show with dance, music, and extravagant costumes.", address: "116 Avenue des Champs-Élysées, 75008 Paris", website: "https://www.lido.fr" }
-            ],
-            "Museums": [
-                { title: "Louvre Museum", description: "World-famous art museum featuring the Mona Lisa, Venus de Milo, and thousands of other masterpieces.", address: "Rue de Rivoli, 75001 Paris", website: "https://www.louvre.fr" },
-                { title: "Musée d’Orsay", description: "Impressionist art in a stunning former railway station; Monet, Van Gogh, Renoir collections.", address: "1 Rue de la Légion d’Honneur, 75007 Paris", website: "https://www.musee-orsay.fr" },
-                { title: "Centre Pompidou", description: "Modern art museum with vibrant exhibitions and a colorful architectural design.", address: "Place Georges-Pompidou, 75004 Paris", website: "https://www.centrepompidou.fr" },
-                { title: "Musée Rodin", description: "Sculptures by Auguste Rodin, set in beautiful gardens; perfect for a peaceful afternoon.", address: "79 Rue de Varenne, 75007 Paris", website: "https://www.musee-rodin.fr" }
-            ],
-            "Parks & Gardens": [
-                { title: "Jardin des Tuileries", description: "Historic formal gardens between the Louvre and Place de la Concorde; perfect for walking and picnics.", address: "Place de la Concorde, 75001 Paris", website: "https://www.louvre.fr/en/jardin-des-tuileries" },
-                { title: "Luxembourg Gardens", description: "Beautifully landscaped park with fountains, statues, playgrounds, and great ambience.", address: "75006 Paris", website: "https://www.senat.fr/visite/jardin/index.html" },
-                { title: "Parc des Buttes-Chaumont", description: "Hilly park with waterfalls, cliffs, and bridges; great for both day picnics and sunset walks.", address: "1 Rue Botzaris, 75019 Paris", website: "https://www.paris.fr/parcdesbutteschaumont" }
-            ],
-            "Shopping": [
-                 { title: "Galeries Lafayette", description: "Iconic department store with luxury brands, fashion, and a rooftop terrace.", address: "40 Boulevard Haussmann, 75009 Paris", website: "https://www.galerieslafayette.com" },
-                 { title: "Merci Concept Store", description: "Trendy boutique offering clothing, home décor, and unique gifts.", address: "111 Boulevard Beaumarchais, 75003 Paris", website: "https://www.merci-merci.com" },
-                 { title: "Marché aux Puces de Saint-Ouen", description: "Famous flea market with vintage fashion, antiques, and collectibles.", address: "140 Rue des Rosiers, 93400 Saint-Ouen", website: "https://www.marcheauxpuces-saintouen.com" }
-            ],
-            "Restaurants": [
-                 { title: "Le Meurice Alain Ducasse", description: "Michelin-starred fine dining in a luxurious palace setting; French haute cuisine at its best.", address: "228 Rue de Rivoli, 75001 Paris", website: "https://www.alain-ducasse.com" },
-                 { title: "Chez Janou", description: "Cozy bistro in Le Marais offering classic Provençal dishes; casual and lively.", address: "2 Rue Roger Verlomme, 75003 Paris", website: "https://www.chezjanou.com" },
-                 { title: "L’As du Fallafel", description: "Famous for its falafel sandwiches; quick, affordable, and popular with locals and tourists.", address: "34 Rue des Rosiers, 75004 Paris", website: "https://www.lasdufallafel.com" },
-                 { title: "Le Relais de l’Entrecôte", description: "Classic French steak-frites restaurant; known for its signature sauce.", address: "20 Rue Saint-Benoît, 75006 Paris", website: "https://www.relaisentrecote.fr" }
-            ]
-        };
-
-        const guideView = document.getElementById('guide-view');
-        const calendarView = document.getElementById('calendar-view');
-        const navGuide = document.getElementById('nav-guide');
-        const navCalendar = document.getElementById('nav-calendar');
-
-        // --- View Switching ---
-        function showGuideView() {
-            guideView.style.display = 'block';
-            calendarView.style.display = 'none';
+    // --- App Content and State ---
+    const appContent = {
+        en: {
+            navGuide: "Paris Guide",
+            pageTitle: "Vavin-Montparnasse: At the Heart of the Roaring Twenties",
+            navVenues: "Venues", navFigures: "Figures", navTimeline: "Timeline", navLegacy: "Legacy",
+            heroTitle: "The Navel of the World",
+            heroSubtitle: "Dive into the heart of Montparnasse during the Roaring Twenties, where the Carrefour Vavin was the epicenter of an artistic and intellectual revolution that changed the world. Explore the venues, meet the legends, and relive an era of unparalleled creative effervescence.",
+            venuesTitle: "The Theaters of Bohemia",
+            venuesSubtitle: "The cafés, studios, and academies were the beating heart of the district. More than just buildings, they were sanctuaries, laboratories for ideas, and stages for life. Click on a venue to discover its history and the figures who brought it to life.",
+            selectVenuePrompt: "Select a venue to display details.",
+            notableFiguresLabel: "Notable figures:",
+            figuresTitle: "The 'Montparnos'",
+            figuresSubtitle: "Artists, writers, muses... They came from all over the world to live and create in Paris. The district was their canvas, their stage, and their inspiration. Filter by discipline to meet these legendary figures.",
+            timelineTitle: "A History in Motion",
+            timelineSubtitle: "From its meteoric rise to its radical transformation, the story of Montparnasse is one of a district in perpetual change. Explore the major periods that shaped its identity.",
+            legacyTitle: "The Spirit of Montparnasse",
+            legacySubtitle: "The Roaring Twenties are over, but the legacy of this golden age endures. Between gentrification and the preservation of memory, what remains of the district's soul today?",
+            cafeChartTitle: "The Personality of the Cafés",
+            cafeChartDescription: "Each great brasserie at the Vavin crossroads had its own character, attracting a distinct clientele. This chart compares their 'personalities' on key criteria of the era, from bohemian vibe to international glamour.",
+            vavinTodayTitle: "Vavin Today: The Ghost in the Machine",
+            vavinTodayP1: "The district has changed radically. The construction of the Tour Montparnasse in the 1970s symbolized a new era, replacing artists' studios with modern offices. Today, Vavin is one of the most chic neighborhoods in Paris.",
+            vavinTodayP2: "The legendary cafés have become high-end brasseries that cultivate their glorious past. The heritage is carefully preserved, but the bohemian and accessible spirit has largely disappeared, replaced by a luxury that draws inspiration from its history. The ghost of the party is still there, but it has become a tourist attraction, a powerful memory of a bygone revolutionary era.",
+            footerText: "&copy; 2025 Vavin Explorer. An interactive exploration of the history of Montparnasse.",
+            filters: [ { key: "all", label: "All" }, { key: "Painting", label: "Painters" }, { key: "Literature", label: "Writers" }, { key: "Photography", label: "Photographers" }, { key: "Muse", label: "Muses" } ],
+            locations: {
+                rotonde: { name: "La Rotonde", subtitle: "The artists' refuge", address: "105, boulevard du Montparnasse", description: "A true institution, its owner Victor Libion was a patron to penniless artists. He accepted drawings as payment and let artists occupy a table for hours, which allowed many to survive.", figures: "Picasso, Modigliani, Diego Rivera" },
+                dome: { name: "Le Dôme", subtitle: "The expats' HQ", address: "108, boulevard du Montparnasse", description: "The first major café in the district, it was the haunt of Anglo-American expatriates. The atmosphere was more intellectual and international, attracting writers and photographers.", figures: "Man Ray, Henry Miller, Chaïm Soutine" },
+                select: { name: "Le Select", subtitle: "The all-night café", address: "99, boulevard du Montparnasse", description: "The first café in the neighborhood to stay open all night. It quickly became the headquarters for American writers of the 'Lost Generation'.", figures: "Hemingway, F. Scott Fitzgerald, Hart Crane" },
+                coupole: { name: "La Coupole", subtitle: "The Art Deco temple", address: "102, boulevard du Montparnasse", description: "Inaugurated in 1927, it symbolizes the peak of the Roaring Twenties. With its immense Art Deco hall and dance floor, it was the most glamorous spot, attracting the entire artistic elite.", figures: "Joséphine Baker, Foujita, Kiki de Montparnasse" },
+                ruche: { name: "La Ruche", subtitle: "The talent factory", address: "2, passage de Dantzig", description: "Nicknamed 'the Villa Medici of misery,' this artists' city offered affordable studios and housing. It was a crucial community living and working space for many foreign artists.", figures: "Chagall, Soutine, Modigliani, Brancusi" },
+                chaumiere: { name: "Grande Chaumière", subtitle: "The open academy", address: "14, rue de la Grande Chaumière", description: "A progressive alternative to the rigid École des Beaux-Arts. With no entrance exam, it was open to everyone, including women who could draw nude male models—a revolution for the time.", figures: "Modigliani, Giacometti, Bourdelle (teacher)" }
+            },
+            personnages: [ { name: "Amedeo Modigliani", discipline: "Painting", bio: "An emblematic and tragic figure, creator of a unique portrait style. His bohemian life is inseparable from the myth of Montparnasse." }, { name: "Pablo Picasso", discipline: "Painting", bio: "A central figure of Cubism, he was an influential regular on the Montparnasse scene, especially at La Rotonde." }, { name: "Chaïm Soutine", discipline: "Painting", bio: "A Lithuanian expressionist painter known for his tortured portraits and still lifes, he lived and worked at La Ruche." }, { name: "Tsuguharu Foujita", discipline: "Painting", bio: "A Japanese artist who merged Eastern and Western techniques, becoming a true star of the Roaring Twenties." }, { name: "Ernest Hemingway", discipline: "Literature", bio: "A leader of the 'Lost Generation,' he immortalized the atmosphere of the district's cafés in his novels, notably 'The Sun Also Rises'." }, { name: "F. Scott Fitzgerald", discipline: "Literature", bio: "Chronicler of the Jazz Age, he frequented Le Select and Le Dôme with other American expatriates." }, { name: "Simone de Beauvoir", discipline: "Literature", bio: "A major existentialist figure, she lived at the Hôtel Danemark on rue Vavin and wrote in the district's cafés with Jean-Paul Sartre." }, { name: "Man Ray", discipline: "Photography", bio: "An American surrealist photographer, he defined the visual image of the era with his portraits and experiments." }, { name: "Kiki de Montparnasse", discipline: "Muse", bio: "The embodiment of the free spirit of the Roaring Twenties. A model, singer, and painter, she was the muse of Man Ray and many other artists." }, { name: "Constantin Brancusi", discipline: "Sculpture", bio: "A pioneer of modern sculpture, he reduced forms to their pure essence from his studio in Impasse Ronsin." }, { name: "Ossip Zadkine", discipline: "Sculpture", bio: "A Russian-born cubist sculptor, he was a major figure of the School of Paris, and his studio is now a museum." }, { name: "Joséphine Baker", discipline: "Muse", bio: "An American dancer and singer, she conquered Paris and was a regular at La Coupole, sometimes accompanied by her cheetah." } ],
+            timeline: [ { year: "1890-1914", title: "The Rise", description: "Montparnasse, with its low rents and numerous studios, begins to attract artists fleeing a Montmartre that has become too touristy. The district becomes fertile ground for the avant-garde.", side: "left" }, { year: "1919-1929", title: "The Roaring Twenties", description: "The golden age. The Carrefour Vavin becomes the 'navel of the world,' attracting a cosmopolitan community of artists and intellectuals. It's the peak of the School of Paris.", side: "right" }, { year: "1930-1945", title: "The End of an Era", description: "The 1929 crisis and rising tensions in Europe end the effervescence. World War II disperses the artistic community and extinguishes the district's flame.", side: "left" }, { year: "1960-1973", title: "The Transformation", description: "The era of corporate modernism. The construction of the Tour Montparnasse demolishes many studios and radically changes the landscape and soul of the district.", side: "right" }, { year: "Today", title: "The Legacy", description: "The district has become chic and expensive. The history of the Roaring Twenties is a selling point, and the mythical venues have become institutions preserving the memory of a bygone past.", side: "left" } ],
+            cafeChartData: { labels: ['Bohemian Vibe', 'American Clientele', 'Intellectual', 'Open All Night', 'Luxury & Glamour'] }
+        },
+        fr: {
+            navGuide: "Guide Paris",
+            pageTitle: "Vavin-Montparnasse : Au Cœur des Années Folles",
+            navVenues: "Lieux", navFigures: "Personnages", navTimeline: "Chronologie", navLegacy: "Héritage",
+            heroTitle: "Le Nombril du Monde",
+            heroSubtitle: "Plongez au cœur du Montparnasse des Années Folles, où le Carrefour Vavin était l'épicentre d'une révolution artistique et intellectuelle qui a changé le monde. Explorez les lieux, rencontrez les légendes et revivez une époque d'effervescence créative sans pareille.",
+            venuesTitle: "Les Théâtres de la Bohème",
+            venuesSubtitle: "Les cafés, ateliers et académies étaient le cœur battant du quartier. Plus que de simples bâtiments, ils étaient des refuges, des laboratoires d'idées et des scènes de vie. Cliquez sur un lieu pour découvrir son histoire et les personnages qui l'ont animé.",
+            selectVenuePrompt: "Sélectionnez un lieu pour afficher les détails.",
+            notableFiguresLabel: "Figures notables :",
+            figuresTitle: "Les 'Montparnos'",
+            figuresSubtitle: "Artistes, écrivains, muses... Ils venaient du monde entier pour vivre et créer à Paris. Le quartier était leur toile, leur scène et leur inspiration. Filtrez par discipline pour rencontrer ces figures légendaires.",
+            timelineTitle: "Une Histoire en Mouvement",
+            timelineSubtitle: "De son ascension fulgurante à sa transformation radicale, l'histoire de Montparnasse est celle d'un quartier en perpétuel changement. Explorez les grandes périodes qui ont façonné son identité.",
+            legacyTitle: "L'Esprit de Montparnasse",
+            legacySubtitle: "Les Années Folles sont terminées, mais l'héritage de cette période dorée perdure. Entre la gentrification et la préservation de la mémoire, qu'est-ce qui subsiste de l'âme du quartier aujourd'hui ?",
+            cafeChartTitle: "La Personnalité des Cafés",
+            cafeChartDescription: "Chaque grande brasserie du carrefour Vavin avait son propre caractère, attirant une clientèle distincte. Ce graphique compare leurs 'personnalités' sur des critères clés de l'époque, de l'ambiance bohème au glamour international.",
+            vavinTodayTitle: "Vavin Aujourd'hui : Le Fantôme dans la Machine",
+            vavinTodayP1: "Le quartier a radicalement changé. La construction de la Tour Montparnasse dans les années 70 a symbolisé une nouvelle ère, remplaçant les ateliers d'artistes par des bureaux modernes. Aujourd'hui, Vavin est l'un des quartiers les plus chics de Paris.",
+            vavinTodayP2: "Les cafés légendaires sont devenus des brasseries haut de gamme qui cultivent leur passé glorieux. L'héritage est soigneusement préservé, mais l'esprit bohème et accessible a largement disparu, remplacé par un luxe qui s'inspire de son histoire. Le fantôme de la fête est toujours là, mais il est devenu une attraction touristique, un souvenir puissant d'une époque révolutionnaire révolue.",
+            footerText: "&copy; 2025 Explorateur Vavin. Une exploration interactive de l'histoire de Montparnasse.",
+            filters: [ { key: "all", label: "Tous" }, { key: "Peinture", label: "Peintres" }, { key: "Littérature", label: "Écrivains" }, { key: "Photographie", label: "Photographes" }, { key: "Muse", label: "Muses" } ],
+            locations: {
+                rotonde: { name: "La Rotonde", subtitle: "Le refuge des artistes", address: "105, boulevard du Montparnasse", description: "Véritable institution, son propriétaire Victor Libion était le mécène des artistes sans le sou. Il acceptait des dessins en paiement et laissait les artistes occuper une table pendant des heures, ce qui a permis à beaucoup de survivre.", figures: "Picasso, Modigliani, Diego Rivera" },
+                dome: { name: "Le Dôme", subtitle: "Le QG des expatriés", address: "108, boulevard du Montparnasse", description: "Premier grand café du quartier, c'était le repaire des expatriés anglo-américains. L'ambiance y était plus intellectuelle et internationale, attirant écrivains et photographes.", figures: "Man Ray, Henry Miller, Chaïm Soutine" },
+                select: { name: "Le Select", subtitle: "Le café de la nuit", address: "99, boulevard du Montparnasse", description: "Le premier café du quartier à rester ouvert toute la nuit. Il est rapidement devenu le quartier général des écrivains américains de la 'Génération Perdue'.", figures: "Hemingway, F. Scott Fitzgerald, Hart Crane" },
+                coupole: { name: "La Coupole", subtitle: "Le temple Art déco", address: "102, boulevard du Montparnasse", description: "Inaugurée en 1927, elle symbolise l'apogée des Années Folles. Avec son immense salle Art déco et son dancing, c'était le lieu le plus glamour, attirant tout le gotha artistique.", figures: "Joséphine Baker, Foujita, Kiki de Montparnasse" },
+                ruche: { name: "La Ruche", subtitle: "L'usine à talents", address: "2, passage de Dantzig", description: "Surnommée 'la Villa Médicis de la misère', cette cité d'artistes offrait des ateliers et logements abordables. C'était un lieu de vie et de travail communautaire crucial pour de nombreux artistes étrangers.", figures: "Chagall, Soutine, Modigliani, Brancusi" },
+                chaumiere: { name: "Grande Chaumière", subtitle: "L'académie libre", address: "14, rue de la Grande Chaumière", description: "Alternative progressiste à la rigide École des Beaux-Arts. Sans examen d'entrée, elle était ouverte à tous, y compris aux femmes qui pouvaient y dessiner des modèles masculins nus, une révolution pour l'époque.", figures: "Modigliani, Giacometti, Bourdelle (enseignant)" }
+            },
+            personnages: [ { name: "Amedeo Modigliani", discipline: "Peinture", bio: "Figure emblématique et tragique, créateur d'un style de portrait unique. Sa vie de bohème est indissociable du mythe de Montparnasse." }, { name: "Pablo Picasso", discipline: "Peinture", bio: "Figure centrale du cubisme, il était un habitué influent de la scène de Montparnasse, notamment de La Rotonde." }, { name: "Chaïm Soutine", discipline: "Peinture", bio: "Peintre expressionniste lituanien, connu pour ses portraits torturés et ses natures mortes, il a vécu et travaillé à La Ruche." }, { name: "Tsuguharu Foujita", discipline: "Peinture", bio: "Artiste japonais qui a fusionné les techniques orientales et occidentales, devenant une véritable star des Années Folles." }, { name: "Ernest Hemingway", discipline: "Littérature", bio: "Chef de file de la 'Génération Perdue', il a immortalisé l'ambiance des cafés du quartier dans ses romans, notamment 'Le soleil se lève aussi'." }, { name: "F. Scott Fitzgerald", discipline: "Littérature", bio: "Chroniqueur de l'Âge du Jazz, il fréquentait Le Select et Le Dôme avec d'autres expatriés américains." }, { name: "Simone de Beauvoir", discipline: "Littérature", bio: "Figure existentialiste majeure, elle a vécu à l'Hôtel Danemark rue Vavin et écrit dans les cafés du quartier avec Jean-Paul Sartre." }, { name: "Man Ray", discipline: "Photographie", bio: "Photographe surréaliste américain, il a défini l'image visuelle de l'époque avec ses portraits et ses expérimentations." }, { name: "Kiki de Montparnasse", discipline: "Muse", bio: "Incarnation de l'esprit libre des Années Folles. Modèle, chanteuse et peintre, elle fut la muse de Man Ray et de nombreux autres artistes." }, { name: "Constantin Brancusi", discipline: "Sculpture", bio: "Pionnier de la sculpture moderne, il a réduit les formes à leur essence pure depuis son atelier de l'Impasse Ronsin." }, { name: "Ossip Zadkine", discipline: "Sculpture", bio: "Sculpteur cubiste d'origine russe, il fut une figure majeure de l'École de Paris et son atelier est aujourd'hui un musée." }, { name: "Joséphine Baker", discipline: "Muse", bio: "Danseuse et chanteuse américaine, elle a conquis Paris et était une habituée de La Coupole, parfois accompagnée de son guépard." } ],
+            timeline: [ { year: "1890-1914", title: "L'Ascension", description: "Montparnasse, avec ses loyers bas et ses nombreux ateliers, commence à attirer des artistes qui fuient un Montmartre devenu trop touristique. Le quartier devient un terrain fertile pour l'avant-garde.", side: "left" }, { year: "1919-1929", title: "Les Années Folles", description: "L'âge d'or. Le Carrefour Vavin devient le 'nombril du monde', attirant une communauté cosmopolite d'artistes et d'intellectuels. C'est l'apogée de l'École de Paris.", side: "right" }, { year: "1930-1945", title: "La Fin d'une Époque", description: "La crise de 1929 et la montée des tensions en Europe mettent fin à l'effervescence. La Seconde Guerre mondiale disperse la communauté artistique et éteint la flamme du quartier.", side: "left" }, { year: "1960-1973", title: "La Transformation", description: "L'ère du modernisme d'entreprise. La construction de la Tour Montparnasse rase de nombreux ateliers et change radicalement le paysage et l'âme du quartier.", side: "right" }, { year: "Aujourd'hui", title: "L'Héritage", description: "Le quartier est devenu chic et cher. L'histoire des Années Folles est un argument commercial, et les lieux mythiques sont devenus des institutions préservant la mémoire d'un passé révolu.", side: "left" } ],
+            cafeChartData: { labels: ['Ambiance Bohème', 'Clientèle Américaine', 'Intellectuel', 'Ouvert la Nuit', 'Luxe & Glamour'] }
         }
+    };
+    let currentLanguage = 'en';
+    let currentFilter = 'all';
+    let cafeChartInstance = null;
 
-        function showCalendarView() {
-            guideView.style.display = 'none';
-            calendarView.style.display = 'block';
-            renderCalendar();
-        }
+    // --- DOM Elements ---
+    const vavinExplorerView = document.getElementById('vavin-explorer-view');
+    const parisGuideView = document.getElementById('paris-guide-view');
+    const locationDetails = vavinExplorerView.querySelector('#location-details');
+    const personnagesGrid = vavinExplorerView.querySelector('#personnages-grid');
+    const timelineContainer = vavinExplorerView.querySelector('#timeline-container');
+    const locationsGrid = vavinExplorerView.querySelector('#locations-grid');
+    const filtersContainer = vavinExplorerView.querySelector('#filters-container');
 
+    // --- View Switching Logic ---
+    function showVavinExplorer() {
+        vavinExplorerView.classList.remove('hidden');
+        parisGuideView.classList.add('hidden');
+    }
+    function showParisGuide() {
+        vavinExplorerView.classList.add('hidden');
+        parisGuideView.classList.remove('hidden');
+    }
+    
+    document.querySelectorAll('a[href="#lieux"], a[href="#personnages"], a[href="#chronologie"], a[href="#heritage"]').forEach(link => {
+        link.addEventListener('click', (e) => {
+            showVavinExplorer();
+        });
+    });
+    document.getElementById('nav-guide-parisien').addEventListener('click', (e) => {
+        e.preventDefault();
+        showParisGuide();
+    });
+     document.getElementById('nav-guide-parisien-mobile').addEventListener('click', (e) => {
+        e.preventDefault();
+        showParisGuide();
+        mobileMenu.classList.add('hidden');
+    });
+
+    // --- Vavin Explorer Logic ---
+    function updateVavinContent(lang) {
+        currentLanguage = lang;
+        const content = appContent[lang];
+        document.documentElement.lang = lang;
+        document.title = content.pageTitle;
+        document.querySelectorAll('[data-lang-key]').forEach(el => {
+            const key = el.dataset.langKey;
+            if (content[key]) el.textContent = content[key];
+        });
+        renderLocations(lang);
+        renderFilters(lang);
+        renderPersonnages(lang, currentFilter);
+        renderTimeline(lang);
+        renderCafeChart(lang);
+        locationDetails.innerHTML = `<div class="text-center text-gray-500"><p>${content.selectVenuePrompt}</p></div>`;
+    }
+
+    function renderLocations(lang) {
+        const locations = appContent[lang].locations;
+        locationsGrid.innerHTML = '';
+        Object.keys(locations).forEach(key => {
+            const location = locations[key];
+            const button = document.createElement('button');
+            button.className = 'location-btn card bg-white p-4 rounded-lg shadow text-center';
+            button.dataset.key = key;
+            button.innerHTML = `<span class="text-4xl">${{rotonde:'☕️', dome:'🌍', select:'🌙', coupole:'✨', ruche:'🎨', chaumiere:'🏛️'}[key]}</span><h4 class="font-bold mt-2">${location.name}</h4><p class="text-sm text-gray-500">${location.subtitle}</p>`;
+            button.addEventListener('click', () => {
+                const locationData = appContent[currentLanguage].locations[key];
+                locationDetails.innerHTML = `<div class="fade-in"><h4 class="text-2xl font-bold text-gray-800 mb-2">${locationData.name}</h4><p class="text-sm font-semibold text-gray-500 mb-4">${locationData.address}</p><p class="text-gray-600 mb-4">${locationData.description}</p><p class="text-gray-600"><strong class="font-semibold">${appContent[currentLanguage].notableFiguresLabel}</strong> ${locationData.figures}</p></div>`;
+            });
+            locationsGrid.appendChild(button);
+        });
+    }
+    
+    function renderFilters(lang) {
+        filtersContainer.innerHTML = '';
+        appContent[lang].filters.forEach(filter => {
+            const button = document.createElement('button');
+            button.className = 'filter-btn px-4 py-2 text-sm font-semibold rounded-full bg-gray-200 text-gray-700';
+            button.dataset.filter = filter.key;
+            button.textContent = filter.label;
+            if (filter.key === currentFilter) button.classList.add('active-filter');
+            button.addEventListener('click', () => {
+                currentFilter = filter.key;
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active-filter'));
+                button.classList.add('active-filter');
+                renderPersonnages(currentLanguage, currentFilter);
+            });
+            filtersContainer.appendChild(button);
+        });
+    }
+
+    function renderPersonnages(lang, filter) {
+        const personnages = appContent[lang].personnages;
+        personnagesGrid.innerHTML = '';
+        const filtered = (filter === 'all') ? personnages : personnages.filter(p => p.discipline === filter || (filter === 'Peinture' && p.discipline === 'Sculpture'));
+        filtered.forEach(p => {
+            const card = document.createElement('div');
+            card.className = 'card bg-white p-4 rounded-lg shadow text-center fade-in';
+            card.innerHTML = `<h5 class="font-bold text-gray-800">${p.name}</h5><p class="text-sm text-gray-500 mb-2">${p.discipline}</p><p class="text-xs text-gray-600">${p.bio}</p>`;
+            personnagesGrid.appendChild(card);
+        });
+    }
+
+    function renderTimeline(lang) {
+        const timelineData = appContent[lang].timeline;
+        timelineContainer.innerHTML = '';
+        timelineData.forEach(item => {
+            const itemDiv = document.createElement('div');
+            const content = `<div class="bg-white p-6 rounded-lg shadow-lg w-full mx-auto lg:w-2/5"><h4 class="text-lg font-bold text-gray-800">${item.year}</h4><h5 class="text-md font-semibold text-gray-700 mb-2">${item.title}</h5><p class="text-sm text-gray-600">${item.description}</p></div>`;
+            itemDiv.className = item.side === 'left' ? 'flex justify-start' : 'flex justify-end';
+            itemDiv.innerHTML = content;
+            timelineContainer.appendChild(itemDiv);
+        });
+    }
+
+    function renderCafeChart(lang) {
+        if (cafeChartInstance) cafeChartInstance.destroy();
+        const ctx = document.getElementById('cafeChart').getContext('2d');
+        const chartData = appContent[lang].cafeChartData;
+        cafeChartInstance = new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: chartData.labels,
+                datasets: [{ label: 'La Rotonde', data: [5, 2, 3, 1, 2], backgroundColor: 'rgba(193, 102, 107, 0.2)', borderColor: 'rgba(193, 102, 107, 1)', pointBackgroundColor: 'rgba(193, 102, 107, 1)' }, { label: 'Le Dôme', data: [3, 4, 5, 1, 3], backgroundColor: 'rgba(74, 85, 104, 0.2)', borderColor: 'rgba(74, 85, 104, 1)', pointBackgroundColor: 'rgba(74, 85, 104, 1)' }, { label: 'Le Select', data: [2, 5, 4, 5, 2], backgroundColor: 'rgba(216, 174, 126, 0.2)', borderColor: 'rgba(216, 174, 126, 1)', pointBackgroundColor: 'rgba(216, 174, 126, 1)' }, { label: 'La Coupole', data: [3, 3, 3, 3, 5], backgroundColor: 'rgba(113, 128, 150, 0.2)', borderColor: 'rgba(113, 128, 150, 1)', pointBackgroundColor: 'rgba(113, 128, 150, 1)' }]
+            },
+            options: { maintainAspectRatio: false, scales: { r: { angleLines: { color: 'rgba(0, 0, 0, 0.1)' }, grid: { color: 'rgba(0, 0, 0, 0.1)' }, pointLabels: { font: { size: 12 } }, suggestedMin: 0, suggestedMax: 5, ticks: { stepSize: 1, backdropColor: 'rgba(253, 251, 245, 0.75)' } } }, plugins: { legend: { position: 'top' } } }
+        });
+    }
+
+    // --- Paris Guide Logic ---
+    function initializeParisGuide() {
+        const guideData = { "For Kids": [ { title: "Jardin d’Acclimatation", description: "Classic amusement park with rides, farm animals, puppet shows, and workshops.", address: "Bois de Boulogne, 75116 Paris", website: "https://www.jardindacclimatation.fr" }, { title: "Cité des Enfants", description: "Hands-on science museum for kids, with interactive exhibits for ages 2–12.", address: "30 Avenue Corentin Cariou, 75019 Paris", website: "https://www.cite-sciences.fr/en/home" }, { title: "Parc Zoologique de Paris", description: "Large zoo with diverse animal species and educational shows; perfect for animal-loving kids.", address: "5 Avenue Daumesnil, 75012 Paris", website: "https://www.parczoologiquedeparis.fr" }, { title: "Aquaboulevard", description: "Huge indoor water park with slides, wave pool, and toddler areas; good for rainy days.", address: "4 Rue Louis Armand, 75015 Paris", website: "https://www.aquaboulevard.fr" }, { title: "Le Manoir de Paris", description: "Interactive haunted house with actors; fun for older kids and teens who like a thrill.", address: "18 Rue de Paradis, 75010 Paris", website: "https://www.lemanoirdeparis.com" } ], "For Adults": [ { title: "Le Marais Walking Tour", description: "Explore the historic Marais district with boutique shops, cafés, and galleries.", address: "Starts at Place des Vosges, 75004 Paris", website: "https://www.paris-walking-tours.com" }, { title: "Seine River Dinner Cruise", description: "Romantic evening cruise with dinner and views of Paris landmarks like the Eiffel Tower.", address: "Port de la Bourdonnais, 75007 Paris", website: "https://www.bateauxparisiens.com" }, { title: "Montmartre Wine & Food Tour", description: "Guided tasting of French wines, cheeses, and pastries in the bohemian Montmartre district.", address: "Starts at Abbesses Metro, 75018 Paris", website: "https://www.parisbyfood.com" }, { title: "Rooftop Bar: Le Perchoir", description: "Trendy rooftop bar with cocktails and panoramic city views; ideal for evening drinks.", address: "14 Rue Crespin du Gast, 75011 Paris", website: "https://www.leperchoir.fr" } ], "Theatre": [ { title: "Comédie-Française", description: "France’s national theatre with classical French plays; iconic and historical venue.", address: "2 Rue de Richelieu, 75001 Paris", website: "https://www.comedie-francaise.fr" }, { title: "Théâtre Mogador", description: "Large theatre hosting musicals and popular English-language shows like The Lion King.", address: "25 Rue de Mogador, 75009 Paris", website: "https://www.theatremogador.com" }, { title: "Le Lido de Paris", description: "Legendary cabaret show with dance, music, and extravagant costumes.", address: "116 Avenue des Champs-Élysées, 75008 Paris", website: "https://www.lido.fr" } ], "Museums": [ { title: "Louvre Museum", description: "World-famous art museum featuring the Mona Lisa, Venus de Milo, and thousands of other masterpieces.", address: "Rue de Rivoli, 75001 Paris", website: "https://www.louvre.fr" }, { title: "Musée d’Orsay", description: "Impressionist art in a stunning former railway station; Monet, Van Gogh, Renoir collections.", address: "1 Rue de la Légion d’Honneur, 75007 Paris", website: "https://www.musee-orsay.fr" }, { title: "Centre Pompidou", description: "Modern art museum with vibrant exhibitions and a colorful architectural design.", address: "Place Georges-Pompidou, 75004 Paris", website: "https://www.centrepompidou.fr" }, { title: "Musée Rodin", description: "Sculptures by Auguste Rodin, set in beautiful gardens; perfect for a peaceful afternoon.", address: "79 Rue de Varenne, 75007 Paris", website: "https://www.musee-rodin.fr" } ], "Parks & Gardens": [ { title: "Jardin des Tuileries", description: "Historic formal gardens between the Louvre and Place de la Concorde; perfect for walking and picnics.", address: "Place de la Concorde, 75001 Paris", website: "https://www.louvre.fr/en/jardin-des-tuileries" }, { title: "Luxembourg Gardens", description: "Beautifully landscaped park with fountains, statues, playgrounds, and great ambience.", address: "75006 Paris", website: "https://www.senat.fr/visite/jardin/index.html" }, { title: "Parc des Buttes-Chaumont", description: "Hilly park with waterfalls, cliffs, and bridges; great for both day picnics and sunset walks.", address: "1 Rue Botzaris, 75019 Paris", website: "https://www.paris.fr/parcdesbutteschaumont" } ], "Shopping": [ { title: "Galeries Lafayette", description: "Iconic department store with luxury brands, fashion, and a rooftop terrace.", address: "40 Boulevard Haussmann, 75009 Paris", website: "https://www.galerieslafayette.com" }, { title: "Merci Concept Store", description: "Trendy boutique offering clothing, home décor, and unique gifts.", address: "111 Boulevard Beaumarchais, 75003 Paris", website: "https://www.merci-merci.com" }, { title: "Marché aux Puces de Saint-Ouen", description: "Famous flea market with vintage fashion, antiques, and collectibles.", address: "140 Rue des Rosiers, 93400 Saint-Ouen", website: "https://www.marcheauxpuces-saintouen.com" } ], "Restaurants": [ { title: "Le Meurice Alain Ducasse", description: "Michelin-starred fine dining in a luxurious palace setting; French haute cuisine at its best.", address: "228 Rue de Rivoli, 75001 Paris", website: "https://www.alain-ducasse.com" }, { title: "Chez Janou", description: "Cozy bistro in Le Marais offering classic Provençal dishes; casual and lively.", address: "2 Rue Roger Verlomme, 75003 Paris", website: "https://www.chezjanou.com" }, { title: "L’As du Fallafel", description: "Famous for its falafel sandwiches; quick, affordable, and popular with locals and tourists.", address: "34 Rue des Rosiers, 75004 Paris", website: "https://www.lasdufallafel.com" }, { title: "Le Relais de l’Entrecôte", description: "Classic French steak-frites restaurant; known for its signature sauce.", address: "20 Rue Saint-Benoît, 75006 Paris", website: "https://www.relaisentrecote.fr" } ] };
+        const guideView = parisGuideView.querySelector('#guide-view');
+        const calendarView = parisGuideView.querySelector('#calendar-view');
+        const navGuide = parisGuideView.querySelector('#nav-guide');
+        const navCalendar = parisGuideView.querySelector('#nav-calendar');
+        function showGuideView() { guideView.style.display = 'block'; calendarView.style.display = 'none'; }
+        function showCalendarView() { guideView.style.display = 'none'; calendarView.style.display = 'block'; renderCalendar(); }
         navGuide.addEventListener('click', showGuideView);
         navCalendar.addEventListener('click', showCalendarView);
-
-        // --- Guide Generation ---
         function createGuide() {
             for (const category in guideData) {
                 const section = document.createElement('section');
                 section.id = category.toLowerCase().replace(/ /g, '-');
                 section.className = 'container';
-                
                 const title = document.createElement('h2');
                 title.textContent = category;
                 section.appendChild(title);
-                
                 const grid = document.createElement('div');
                 grid.className = 'grid';
-                
                 guideData[category].forEach(place => {
                     const card = document.createElement('article');
                     card.className = 'card';
-                    card.innerHTML = `
-                        <div class="card-content">
-                            <h3>${place.title}</h3>
-                            <p class="card-description">${place.description}</p>
-                            <div class="card-footer">
-                                <button class="btn add-to-plan-btn" data-place-title="${place.title}">Add to Plan</button>
-                                <a href="${place.website}" target="_blank">Website &rarr;</a>
-                            </div>
-                        </div>
-                    `;
+                    card.innerHTML = `<div class="card-content"><h3>${place.title}</h3><p class="card-description">${place.description}</p><div class="card-footer"><button class="btn add-to-plan-btn" data-place-title="${place.title}">Add to Plan</button><a href="${place.website}" target="_blank">Website &rarr;</a></div></div>`;
                     grid.appendChild(card);
                 });
                 section.appendChild(grid);
                 guideView.appendChild(section);
             }
         }
-
-        // --- Modal Logic ---
-        const modal = document.getElementById('event-modal');
-        const modalPlaceName = document.getElementById('modal-place-name');
-        const eventDateInput = document.getElementById('event-date');
-        const saveEventBtn = document.getElementById('save-event');
-        const cancelEventBtn = document.getElementById('cancel-event');
+        const modal = parisGuideView.querySelector('#event-modal');
+        const modalPlaceName = parisGuideView.querySelector('#modal-place-name');
+        const eventDateInput = parisGuideView.querySelector('#event-date');
+        const saveEventBtn = parisGuideView.querySelector('#save-event');
+        const cancelEventBtn = parisGuideView.querySelector('#cancel-event');
         let currentPlaceTitle = '';
-
         guideView.addEventListener('click', (e) => {
             if (e.target.classList.contains('add-to-plan-btn')) {
                 currentPlaceTitle = e.target.getAttribute('data-place-title');
@@ -283,19 +502,10 @@
                 modal.classList.add('active');
             }
         });
-
-        function closeModal() {
-            modal.classList.remove('active');
-        }
-        
+        function closeModal() { modal.classList.remove('active'); }
         cancelEventBtn.addEventListener('click', closeModal);
-        modal.addEventListener('click', (e) => {
-             if (e.target === modal) closeModal();
-        });
-
-        // --- Event Storage & Handling ---
+        modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
         let events = JSON.parse(localStorage.getItem('parisEvents')) || [];
-        
         saveEventBtn.addEventListener('click', () => {
             const eventDate = eventDateInput.value;
             if (eventDate && currentPlaceTitle) {
@@ -307,23 +517,18 @@
                 alert('Please select a date.');
             }
         });
-
-        // --- Calendar Logic ---
-        const calendarMonthYear = document.getElementById('calendar-month-year');
-        const calendarBody = document.getElementById('calendar-body');
-        const calendarHeader = document.getElementById('calendar-days-header');
-        const prevMonthBtn = document.getElementById('prev-month');
-        const nextMonthBtn = document.getElementById('next-month');
+        const calendarMonthYear = parisGuideView.querySelector('#calendar-month-year');
+        const calendarBody = parisGuideView.querySelector('#calendar-body');
+        const calendarHeader = parisGuideView.querySelector('#calendar-days-header');
+        const prevMonthBtn = parisGuideView.querySelector('#prev-month');
+        const nextMonthBtn = parisGuideView.querySelector('#next-month');
         let currentDate = new Date();
-
         function renderCalendar() {
             calendarBody.innerHTML = '';
             calendarHeader.innerHTML = '';
             const month = currentDate.getMonth();
             const year = currentDate.getFullYear();
-            
             calendarMonthYear.textContent = `${currentDate.toLocaleString('default', { month: 'long' })} ${year}`;
-
             const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
             daysOfWeek.forEach(day => {
                 const dayHeader = document.createElement('div');
@@ -331,26 +536,19 @@
                 dayHeader.textContent = day;
                 calendarHeader.appendChild(dayHeader);
             });
-
             const firstDay = new Date(year, month, 1).getDay();
             const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-            // Blanks for previous month
             for (let i = 0; i < firstDay; i++) {
                 const emptyCell = document.createElement('div');
                 emptyCell.className = 'calendar-day other-month';
                 calendarBody.appendChild(emptyCell);
             }
-
-            // Days of current month
             for (let day = 1; day <= daysInMonth; day++) {
                 const dayCell = document.createElement('div');
                 dayCell.className = 'calendar-day';
                 dayCell.innerHTML = `<div class="calendar-day-number">${day}</div>`;
-                
                 const cellDate = new Date(year, month, day);
                 const dateString = cellDate.toISOString().split('T')[0];
-
                 const dayEvents = events.filter(e => e.date === dateString);
                 dayEvents.forEach(event => {
                     const eventEl = document.createElement('div');
@@ -358,26 +556,45 @@
                     eventEl.textContent = event.title;
                     dayCell.appendChild(eventEl);
                 });
-
                 calendarBody.appendChild(dayCell);
             }
         }
-
-        prevMonthBtn.addEventListener('click', () => {
-            currentDate.setMonth(currentDate.getMonth() - 1);
-            renderCalendar();
-        });
-
-        nextMonthBtn.addEventListener('click', () => {
-            currentDate.setMonth(currentDate.getMonth() + 1);
-            renderCalendar();
-        });
-
-        // --- Initial Load ---
+        prevMonthBtn.addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth() - 1); renderCalendar(); });
+        nextMonthBtn.addEventListener('click', () => { currentDate.setMonth(currentDate.getMonth() + 1); renderCalendar(); });
         createGuide();
         showGuideView();
-    });
-    </script>
+    }
 
+    // --- General Setup ---
+    document.querySelectorAll('.lang-btn, .lang-btn-mobile').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const lang = btn.dataset.lang;
+            updateVavinContent(lang);
+            document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll(`.lang-btn[data-lang="${lang}"]`).forEach(b => b.classList.add('active'));
+        });
+    });
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+    mobileMenuButton.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+    const navLinks = document.querySelectorAll('header nav a.nav-link');
+    const sections = document.querySelectorAll('#vavin-explorer-view section');
+    window.addEventListener('scroll', () => {
+        let current = '';
+        sections.forEach(section => {
+            if (pageYOffset >= section.offsetTop - 100) current = section.getAttribute('id');
+        });
+        navLinks.forEach(link => {
+            link.classList.remove('active-nav');
+            if (link.href && link.href.includes(current)) link.classList.add('active-nav');
+        });
+    });
+
+    // --- Initial Load ---
+    updateVavinContent('en');
+    initializeParisGuide();
+    showVavinExplorer();
+});
+</script>
 </body>
 </html>

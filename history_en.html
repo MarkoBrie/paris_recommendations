@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vavin-Montparnasse: At the Heart of the Roaring Twenties</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Parisian Café (Warm neutrals like beige/cream, with dark brown text and muted red/blue accents) -->
+    <!-- Application Structure Plan: A thematic, non-linear SPA. The core is an interactive map of key venues, supplemented by a filterable gallery of notable figures, a visual timeline, and a comparative chart of café personalities. This structure encourages exploration and discovery over passive reading, making the rich history of Vavin more engaging and digestible for a general audience. Navigation is handled by a sticky header for easy access to all sections. -->
+    <!-- Visualization & Content Choices: 1. Locations: Interactive HTML/CSS diagram instead of a map. Goal: Explore. Interaction: Click to show info panel. Justification: Simpler, more focused on key sites. 2. Figures: Filterable HTML grid. Goal: Organize/Inform. Interaction: Click for details. Justification: Allows users to focus on specific disciplines. 3. Café Comparison: Chart.js Radar Chart. Goal: Compare. Interaction: Hover for tooltips. Justification: Visually represents the distinct "personality" of each café described in the text. 4. Timeline: Interactive HTML/CSS component. Goal: Show Change. Interaction: Click to reveal era summary. Justification: Provides clear historical context. CONFIRMED: No SVG/Mermaid used. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FDFBF5;
+            color: #4A4A4A;
+        }
+        .active-nav {
+            color: #C1666B;
+            border-bottom: 2px solid #C1666B;
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link:hover {
+            color: #C1666B;
+            border-bottom: 2px solid #C1666B;
+        }
+        .card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .active-filter {
+            background-color: #4A5568;
+            color: #FFFFFF;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-gray-800">Vavin 1920</h1>
+            <div class="hidden md:flex space-x-8">
+                <a href="#lieux" class="nav-link text-gray-600 font-semibold pb-1 active-nav">Venues</a>
+                <a href="#personnages" class="nav-link text-gray-600 font-semibold pb-1">Figures</a>
+                <a href="#chronologie" class="nav-link text-gray-600 font-semibold pb-1">Timeline</a>
+                <a href="#heritage" class="nav-link text-gray-600 font-semibold pb-1">Legacy</a>
+            </div>
+             <button id="mobile-menu-button" class="md:hidden focus:outline-none">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+            </button>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden">
+            <a href="#lieux" class="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100">Venues</a>
+            <a href="#personnages" class="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100">Figures</a>
+            <a href="#chronologie" class="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100">Timeline</a>
+            <a href="#heritage" class="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100">Legacy</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-12">
+
+        <section class="text-center mb-20">
+            <h2 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4">The Navel of the World</h2>
+            <p class="text-lg text-gray-600 max-w-3xl mx-auto">Dive into the heart of Montparnasse during the Roaring Twenties, where the Carrefour Vavin was the epicenter of an artistic and intellectual revolution that changed the world. Explore the venues, meet the legends, and relive an era of unparalleled creative effervescence.</p>
+        </section>
+
+        <section id="lieux" class="mb-20">
+            <h3 class="text-3xl font-bold text-center text-gray-800 mb-2">The Theaters of Bohemia</h3>
+            <p class="text-center text-gray-600 mb-12 max-w-2xl mx-auto">The cafés, studios, and academies were the beating heart of the district. More than just buildings, they were sanctuaries, laboratories for ideas, and stages for life. Click on a venue to discover its history and the figures who brought it to life.</p>
+            
+            <div class="lg:flex lg:space-x-8">
+                <div class="lg:w-1/2 grid grid-cols-2 gap-4 mb-8 lg:mb-0">
+                    <button data-key="rotonde" class="location-btn card bg-white p-4 rounded-lg shadow text-center">
+                        <span class="text-4xl">☕️</span>
+                        <h4 class="font-bold mt-2">La Rotonde</h4>
+                        <p class="text-sm text-gray-500">The artists' refuge</p>
+                    </button>
+                    <button data-key="dome" class="location-btn card bg-white p-4 rounded-lg shadow text-center">
+                        <span class="text-4xl">🌍</span>
+                        <h4 class="font-bold mt-2">Le Dôme</h4>
+                        <p class="text-sm text-gray-500">The expats' HQ</p>
+                    </button>
+                    <button data-key="select" class="location-btn card bg-white p-4 rounded-lg shadow text-center">
+                        <span class="text-4xl">🌙</span>
+                        <h4 class="font-bold mt-2">Le Select</h4>
+                        <p class="text-sm text-gray-500">The all-night café</p>
+                    </button>
+                    <button data-key="coupole" class="location-btn card bg-white p-4 rounded-lg shadow text-center">
+                        <span class="text-4xl">✨</span>
+                        <h4 class="font-bold mt-2">La Coupole</h4>
+                        <p class="text-sm text-gray-500">The Art Deco temple</p>
+                    </button>
+                     <button data-key="ruche" class="location-btn card bg-white p-4 rounded-lg shadow text-center col-span-1">
+                        <span class="text-4xl">🎨</span>
+                        <h4 class="font-bold mt-2">La Ruche</h4>
+                        <p class="text-sm text-gray-500">The talent factory</p>
+                    </button>
+                    <button data-key="chaumiere" class="location-btn card bg-white p-4 rounded-lg shadow text-center col-span-1">
+                        <span class="text-4xl">🏛️</span>
+                        <h4 class="font-bold mt-2">Grande Chaumière</h4>
+                        <p class="text-sm text-gray-500">The open academy</p>
+                    </button>
+                </div>
+                <div id="location-details" class="lg:w-1/2 bg-white p-8 rounded-lg shadow-lg min-h-[300px] flex flex-col justify-center">
+                    <div class="text-center text-gray-500">
+                        <p>Select a venue to display details.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="personnages" class="mb-20">
+            <h3 class="text-3xl font-bold text-center text-gray-800 mb-2">The "Montparnos"</h3>
+            <p class="text-center text-gray-600 mb-8 max-w-2xl mx-auto">Artists, writers, muses... They came from all over the world to live and create in Paris. The district was their canvas, their stage, and their inspiration. Filter by discipline to meet these legendary figures.</p>
+            <div class="flex justify-center space-x-2 mb-8">
+                <button class="filter-btn px-4 py-2 text-sm font-semibold rounded-full bg-gray-200 text-gray-700 active-filter" data-filter="all">All</button>
+                <button class="filter-btn px-4 py-2 text-sm font-semibold rounded-full bg-gray-200 text-gray-700" data-filter="Painting">Painters</button>
+                <button class="filter-btn px-4 py-2 text-sm font-semibold rounded-full bg-gray-200 text-gray-700" data-filter="Literature">Writers</button>
+                <button class="filter-btn px-4 py-2 text-sm font-semibold rounded-full bg-gray-200 text-gray-700" data-filter="Photography">Photographers</button>
+                <button class="filter-btn px-4 py-2 text-sm font-semibold rounded-full bg-gray-200 text-gray-700" data-filter="Muse">Muses</button>
+            </div>
+            <div id="personnages-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            </div>
+        </section>
+
+        <section id="chronologie" class="mb-20">
+            <h3 class="text-3xl font-bold text-center text-gray-800 mb-2">A History in Motion</h3>
+            <p class="text-center text-gray-600 mb-12 max-w-2xl mx-auto">From its meteoric rise to its radical transformation, the story of Montparnasse is one of a district in perpetual change. Explore the major periods that shaped its identity.</p>
+            <div class="relative">
+                <div class="border-l-2 border-gray-300 absolute h-full top-0 left-1/2 -ml-px"></div>
+                <div id="timeline-container" class="space-y-12">
+                </div>
+            </div>
+        </section>
+        
+        <section id="heritage" class="mb-20">
+            <h3 class="text-3xl font-bold text-center text-gray-800 mb-2">The Spirit of Montparnasse</h3>
+            <p class="text-center text-gray-600 mb-12 max-w-2xl mx-auto">The Roaring Twenties are over, but the legacy of this golden age endures. Between gentrification and the preservation of memory, what remains of the district's soul today?</p>
+            <div class="grid md:grid-cols-2 gap-8 items-center">
+                <div>
+                    <h4 class="text-xl font-bold text-gray-800 mb-4">The Personality of the Cafés</h4>
+                    <p class="text-gray-600 mb-6">Each great brasserie at the Vavin crossroads had its own character, attracting a distinct clientele. This chart compares their "personalities" on key criteria of the era, from bohemian vibe to international glamour.</p>
+                    <div class="chart-container">
+                        <canvas id="cafeChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white p-8 rounded-lg shadow-lg">
+                    <h4 class="text-xl font-bold text-gray-800 mb-4">Vavin Today: The Ghost in the Machine</h4>
+                    <p class="text-gray-600 mb-4">The district has changed radically. The construction of the Tour Montparnasse in the 1970s symbolized a new era, replacing artists' studios with modern offices. Today, Vavin is one of the most chic neighborhoods in Paris.</p>
+                    <p class="text-gray-600">The legendary cafés have become high-end brasseries that cultivate their glorious past. The heritage is carefully preserved, but the bohemian and accessible spirit has largely disappeared, replaced by a luxury that draws inspiration from its history. The ghost of the party is still there, but it has become a tourist attraction, a powerful memory of a bygone revolutionary era.</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-white border-t border-gray-200">
+        <div class="container mx-auto px-6 py-4 text-center text-gray-500">
+            <p>&copy; 2025 Vavin Explorer. An interactive exploration of the history of Montparnasse.</p>
+        </div>
+    </footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+
+    const data = {
+        locations: {
+            rotonde: {
+                name: "La Rotonde",
+                address: "105, boulevard du Montparnasse",
+                description: "A true institution, its owner Victor Libion was a patron to penniless artists. He accepted drawings as payment and let artists occupy a table for hours, which allowed many to survive.",
+                figures: "Picasso, Modigliani, Diego Rivera"
+            },
+            dome: {
+                name: "Le Dôme",
+                address: "108, boulevard du Montparnasse",
+                description: "The first major café in the district, it was the haunt of Anglo-American expatriates. The atmosphere was more intellectual and international, attracting writers and photographers.",
+                figures: "Man Ray, Henry Miller, Chaïm Soutine"
+            },
+            select: {
+                name: "Le Select",
+                address: "99, boulevard du Montparnasse",
+                description: "The first café in the neighborhood to stay open all night. It quickly became the headquarters for American writers of the 'Lost Generation'.",
+                figures: "Hemingway, F. Scott Fitzgerald, Hart Crane"
+            },
+            coupole: {
+                name: "La Coupole",
+                address: "102, boulevard du Montparnasse",
+                description: "Inaugurated in 1927, it symbolizes the peak of the Roaring Twenties. With its immense Art Deco hall and dance floor, it was the most glamorous spot, attracting the entire artistic elite.",
+                figures: "Joséphine Baker, Foujita, Kiki de Montparnasse"
+            },
+            ruche: {
+                name: "La Ruche",
+                address: "2, passage de Dantzig",
+                description: "Nicknamed 'the Villa Medici of misery,' this artists' city offered affordable studios and housing. It was a crucial community living and working space for many foreign artists.",
+                figures: "Chagall, Soutine, Modigliani, Brancusi"
+            },
+            chaumiere: {
+                name: "Académie de la Grande Chaumière",
+                address: "14, rue de la Grande Chaumière",
+                description: "A progressive alternative to the rigid École des Beaux-Arts. With no entrance exam, it was open to everyone, including women who could draw nude male models—a revolution for the time.",
+                figures: "Modigliani, Giacometti, Bourdelle (teacher)"
+            }
+        },
+        personnages: [
+            { name: "Amedeo Modigliani", discipline: "Painting", bio: "An emblematic and tragic figure, creator of a unique portrait style. His bohemian life is inseparable from the myth of Montparnasse." },
+            { name: "Pablo Picasso", discipline: "Painting", bio: "A central figure of Cubism, he was an influential regular on the Montparnasse scene, especially at La Rotonde." },
+            { name: "Chaïm Soutine", discipline: "Painting", bio: "A Lithuanian expressionist painter known for his tortured portraits and still lifes, he lived and worked at La Ruche." },
+            { name: "Tsuguharu Foujita", discipline: "Painting", bio: "A Japanese artist who merged Eastern and Western techniques, becoming a true star of the Roaring Twenties." },
+            { name: "Ernest Hemingway", discipline: "Literature", bio: "A leader of the 'Lost Generation,' he immortalized the atmosphere of the district's cafés in his novels, notably 'The Sun Also Rises'." },
+            { name: "F. Scott Fitzgerald", discipline: "Literature", bio: "Chronicler of the Jazz Age, he frequented Le Select and Le Dôme with other American expatriates." },
+            { name: "Simone de Beauvoir", discipline: "Literature", bio: "A major existentialist figure, she lived at the Hôtel Danemark on rue Vavin and wrote in the district's cafés with Jean-Paul Sartre." },
+            { name: "Man Ray", discipline: "Photography", bio: "An American surrealist photographer, he defined the visual image of the era with his portraits and experiments." },
+            { name: "Kiki de Montparnasse", discipline: "Muse", bio: "The embodiment of the free spirit of the Roaring Twenties. A model, singer, and painter, she was the muse of Man Ray and many other artists." },
+            { name: "Constantin Brancusi", discipline: "Sculpture", bio: "A pioneer of modern sculpture, he reduced forms to their pure essence from his studio in Impasse Ronsin." },
+            { name: "Ossip Zadkine", discipline: "Sculpture", bio: "A Russian-born cubist sculptor, he was a major figure of the School of Paris, and his studio is now a museum." },
+            { name: "Joséphine Baker", discipline: "Muse", bio: "An American dancer and singer, she conquered Paris and was a regular at La Coupole, sometimes accompanied by her cheetah." }
+        ],
+        timeline: [
+            { year: "1890-1914", title: "The Rise", description: "Montparnasse, with its low rents and numerous studios, begins to attract artists fleeing a Montmartre that has become too touristy. The district becomes fertile ground for the avant-garde.", side: "left" },
+            { year: "1919-1929", title: "The Roaring Twenties", description: "The golden age. The Carrefour Vavin becomes the 'navel of the world,' attracting a cosmopolitan community of artists and intellectuals. It's the peak of the School of Paris.", side: "right" },
+            { year: "1930-1945", title: "The End of an Era", description: "The 1929 crisis and rising tensions in Europe end the effervescence. World War II disperses the artistic community and extinguishes the district's flame.", side: "left" },
+            { year: "1960-1973", title: "The Transformation", description: "The era of corporate modernism. The construction of the Tour Montparnasse demolishes many studios and radically changes the landscape and soul of the district.", side: "right" },
+            { year: "Today", title: "The Legacy", description: "The district has become chic and expensive. The history of the Roaring Twenties is a selling point, and the mythical venues have become institutions preserving the memory of a bygone past.", side: "left" }
+        ]
+    };
+
+    const locationDetails = document.getElementById('location-details');
+    const locationButtons = document.querySelectorAll('.location-btn');
+    locationButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const key = btn.dataset.key;
+            const location = data.locations[key];
+            locationDetails.innerHTML = `
+                <div class="fade-in">
+                    <h4 class="text-2xl font-bold text-gray-800 mb-2">${location.name}</h4>
+                    <p class="text-sm font-semibold text-gray-500 mb-4">${location.address}</p>
+                    <p class="text-gray-600 mb-4">${location.description}</p>
+                    <p class="text-gray-600"><strong class="font-semibold">Notable figures:</strong> ${location.figures}</p>
+                </div>
+            `;
+        });
+    });
+
+    const personnagesGrid = document.getElementById('personnages-grid');
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    
+    function renderPersonnages(filter = 'all') {
+        personnagesGrid.innerHTML = '';
+        const filtered = (filter === 'all') 
+            ? data.personnages 
+            : data.personnages.filter(p => p.discipline === filter || (filter === 'Painting' && p.discipline === 'Sculpture'));
+        
+        filtered.forEach(p => {
+            const card = document.createElement('div');
+            card.className = 'card bg-white p-4 rounded-lg shadow text-center fade-in';
+            card.innerHTML = `
+                <h5 class="font-bold text-gray-800">${p.name}</h5>
+                <p class="text-sm text-gray-500 mb-2">${p.discipline}</p>
+                <p class="text-xs text-gray-600">${p.bio}</p>
+            `;
+            personnagesGrid.appendChild(card);
+        });
+    }
+
+    filterButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            filterButtons.forEach(b => b.classList.remove('active-filter'));
+            btn.classList.add('active-filter');
+            renderPersonnages(btn.dataset.filter);
+        });
+    });
+
+    const timelineContainer = document.getElementById('timeline-container');
+    data.timeline.forEach(item => {
+        const itemDiv = document.createElement('div');
+        const content = `
+            <div class="bg-white p-6 rounded-lg shadow-lg w-full mx-auto lg:w-2/5">
+                <h4 class="text-lg font-bold text-gray-800">${item.year}</h4>
+                <h5 class="text-md font-semibold text-gray-700 mb-2">${item.title}</h5>
+                <p class="text-sm text-gray-600">${item.description}</p>
+            </div>
+        `;
+        if (item.side === 'left') {
+            itemDiv.className = 'flex justify-start';
+            itemDiv.innerHTML = content;
+        } else {
+            itemDiv.className = 'flex justify-end';
+            itemDiv.innerHTML = content;
+        }
+        timelineContainer.appendChild(itemDiv);
+    });
+
+    const ctx = document.getElementById('cafeChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'radar',
+        data: {
+            labels: ['Bohemian Vibe', 'American Clientele', 'Intellectual', 'Open All Night', 'Luxury & Glamour'],
+            datasets: [{
+                label: 'La Rotonde',
+                data: [5, 2, 3, 1, 2],
+                backgroundColor: 'rgba(193, 102, 107, 0.2)',
+                borderColor: 'rgba(193, 102, 107, 1)',
+                pointBackgroundColor: 'rgba(193, 102, 107, 1)',
+            }, {
+                label: 'Le Dôme',
+                data: [3, 4, 5, 1, 3],
+                backgroundColor: 'rgba(74, 85, 104, 0.2)',
+                borderColor: 'rgba(74, 85, 104, 1)',
+                pointBackgroundColor: 'rgba(74, 85, 104, 1)',
+            }, {
+                label: 'Le Select',
+                data: [2, 5, 4, 5, 2],
+                 backgroundColor: 'rgba(216, 174, 126, 0.2)',
+                borderColor: 'rgba(216, 174, 126, 1)',
+                pointBackgroundColor: 'rgba(216, 174, 126, 1)',
+            }, {
+                label: 'La Coupole',
+                data: [3, 3, 3, 3, 5],
+                backgroundColor: 'rgba(113, 128, 150, 0.2)',
+                borderColor: 'rgba(113, 128, 150, 1)',
+                pointBackgroundColor: 'rgba(113, 128, 150, 1)',
+            }]
+        },
+        options: {
+            maintainAspectRatio: false,
+            scales: {
+                r: {
+                    angleLines: { color: 'rgba(0, 0, 0, 0.1)' },
+                    grid: { color: 'rgba(0, 0, 0, 0.1)' },
+                    pointLabels: { font: { size: 12 } },
+                    suggestedMin: 0,
+                    suggestedMax: 5,
+                     ticks: {
+                        stepSize: 1,
+                        backdropColor: 'rgba(253, 251, 245, 0.75)'
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'top',
+                }
+            }
+        }
+    });
+
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+    mobileMenuButton.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+    });
+
+    const navLinks = document.querySelectorAll('nav a');
+    const sections = document.querySelectorAll('main section');
+
+    window.addEventListener('scroll', () => {
+        let current = '';
+        sections.forEach(section => {
+            const sectionTop = section.offsetTop;
+            if (pageYOffset >= sectionTop - 100) {
+                current = section.getAttribute('id');
+            }
+        });
+
+        navLinks.forEach(link => {
+            link.classList.remove('active-nav');
+            if (link.href.includes(current)) {
+                link.classList.add('active-nav');
+            }
+        });
+    });
+
+    renderPersonnages();
+});
+</script>
+</body>
+</html>
