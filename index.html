@@ -96,8 +96,9 @@
         .paris-guide-container .card { background-color: #ffffff; border-radius: 12px; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08); overflow: hidden; display: flex; flex-direction: column; transition: transform 0.3s ease, box-shadow 0.3s ease; }
         .paris-guide-container .card:hover { transform: translateY(-8px); box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12); }
         .paris-guide-container .card-content { padding: 1.5rem; flex-grow: 1; display: flex; flex-direction: column; }
-        .paris-guide-container .card-description { font-size: 0.95rem; color: #777; flex-grow: 1; }
-        .paris-guide-container .card-footer { margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #eaeaea; display: flex; justify-content: space-between; align-items: center; }
+        .paris-guide-container .card-description { font-size: 0.95rem; color: #777; }
+        .paris-guide-container .card-address { font-size: 0.9rem; font-style: italic; color: #555; margin-top: 1rem; }
+        .paris-guide-container .card-footer { margin-top: auto; padding-top: 1rem; border-top: 1px solid #eaeaea; display: flex; justify-content: space-between; align-items: center; }
         .paris-guide-container .btn { background-color: transparent; border: 2px solid #bfa888; color: #bfa888; padding: 0.5rem 1rem; border-radius: 20px; cursor: pointer; font-weight: 600; transition: all 0.3s ease; }
         .paris-guide-container .btn:hover { background-color: #bfa888; color: white; }
         .paris-guide-container .btn-primary { background-color: #e63946; color: white; border-color: #e63946; }
@@ -481,7 +482,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 guideData[category].forEach(place => {
                     const card = document.createElement('article');
                     card.className = 'card';
-                    card.innerHTML = `<div class="card-content"><h3>${place.title}</h3><p class="card-description">${place.description}</p><div class="card-footer"><button class="btn add-to-plan-btn" data-place-title="${place.title}">Add to Plan</button><a href="${place.website}" target="_blank">Website &rarr;</a></div></div>`;
+                    card.innerHTML = `<div class="card-content"><h3>${place.title}</h3><p class="card-description">${place.description}</p><p class="card-address">${place.address}</p><div class="card-footer"><button class="btn add-to-plan-btn" data-place-title="${place.title}">Add to Plan</button><a href="${place.website}" target="_blank">Website &rarr;</a></div></div>`;
                     grid.appendChild(card);
                 });
                 section.appendChild(grid);
